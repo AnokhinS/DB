@@ -4,8 +4,10 @@ import DAO.DaoImpls;
 import DAO.IDao;
 import model.Faculty;
 import model.FormOfEducation;
+import model.Payment;
 import model.Personal;
 import model.Profession;
+import model.Resident;
 import model.ResidentType;
 import model.Room;
 import model.StudentHouse;
@@ -19,6 +21,8 @@ public class Factory {
 	private static IDao<Room> roomDAO = null;
 	private static IDao<StudentHouse> studHouseDAO = null;
 	private static IDao<Personal> personalDAO = null;
+	private static IDao<Payment> paymentDAO = null;
+	private static IDao<Resident> residentDAO = null;
 
 	public static synchronized Factory getInstance() {
 		if (instance == null) {
@@ -74,5 +78,19 @@ public class Factory {
 			personalDAO = new DaoImpls<Personal>(Personal.class);
 		}
 		return personalDAO;
+	}
+
+	public IDao<Payment> getPaymentDAO() {
+		if (paymentDAO == null) {
+			paymentDAO = new DaoImpls<Payment>(Payment.class);
+		}
+		return paymentDAO;
+	}
+
+	public IDao<Resident> getResidentDAO() {
+		if (residentDAO == null) {
+			residentDAO = new DaoImpls<Resident>(Resident.class);
+		}
+		return residentDAO;
 	}
 }
