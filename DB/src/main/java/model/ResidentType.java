@@ -10,6 +10,13 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "resident_types")
 public class ResidentType {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "resident_type_id")
+	private long id;
+	@Column(name = "resident_type")
+	private String residentType;
+
 	public ResidentType(long id) {
 		super();
 		this.id = id;
@@ -17,22 +24,16 @@ public class ResidentType {
 
 	public ResidentType(String resident_type) {
 		super();
-		this.resident_type = resident_type;
+		this.residentType = resident_type;
 	}
 
 	public ResidentType() {
 		super();
 	}
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "resident_type_id")
-	private long id;
-	private String resident_type;
-
 	@Override
 	public String toString() {
-		return "ResidentType [id=" + id + ", resident_type=" + resident_type + "]";
+		return "ResidentType [id=" + id + ", resident_type=" + residentType + "]";
 	}
 
 	public long getId() {
@@ -44,10 +45,10 @@ public class ResidentType {
 	}
 
 	public String getResident_type() {
-		return resident_type;
+		return residentType;
 	}
 
 	public void setResident_type(String resident_type) {
-		this.resident_type = resident_type;
+		this.residentType = resident_type;
 	}
 }

@@ -26,6 +26,8 @@
 	<mapping class="model.Room"/>
 	<mapping class="model.StudentHouse"/>
 	<mapping class="model.Personal"/>
+	<mapping class="model.Payment"/>
+	<mapping class="model.Resident"/>
   </session-factory>
    
 </hibernate-configuration>

@@ -8,6 +8,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -23,15 +25,40 @@ public class Resident {
 	private String sex;
 	private int age;
 	private String phone;
-	@Column(name = "resident_type")
+	@ManyToOne
+	@JoinColumn(name = "resident_type", nullable = false)
 	private ResidentType resType;
+	@ManyToOne
+	@JoinColumn(name = "room", nullable = false)
 	private Room room;
 	private double balance;
+	@ManyToOne
+	@JoinColumn(name = "faculty", nullable = false)
 	private Faculty faculty;
-	@Column(name = "form_of_education")
+	@ManyToOne
+	@JoinColumn(name = "form_of_education", nullable = false)
 	private FormOfEducation foe;
 	@OneToMany(mappedBy = "resident", fetch = FetchType.EAGER)
 	private Set<Payment> payments;
+
+	public Resident() {
+		super();
+	}
+
+	@Override
+	public String toString() {
+		return "Resident [id=" + id + ", name=" + name + ", sex=" + sex + ", age=" + age + ", phone=" + phone
+				+ ", resType=" + resType + ", room=" + room + ", balance=" + balance + ", faculty=" + faculty + ", foe="
+				+ foe + ", payments=" + payments + "]";
+	}
+
+	public Set<Payment> getPayments() {
+		return payments;
+	}
+
+	public void setPayments(Set<Payment> payments) {
+		this.payments = payments;
+	}
 
 	public Resident(String name, String sex, int age, String phone, ResidentType resType, Room room, Faculty faculty,
 			FormOfEducation foe) {
@@ -46,23 +73,9 @@ public class Resident {
 		this.foe = foe;
 	}
 
-	public Resident() {
+	public Resident(long id) {
 		super();
-	}
-
-	@Override
-	public String toString() {
-		return "Resident [id=" + id + ", name=" + name + ", sex=" + sex + ", age=" + age + ", phone=" + phone
-				+ ", resType=" + resType + ", room=" + room + ", balance=" + balance + ", faculty=" + faculty + ", foe="
-				+ foe + "]";
-	}
-
-	public Set<Payment> getPayments() {
-		return payments;
-	}
-
-	public void setPayments(Set<Payment> payments) {
-		this.payments = payments;
+		this.id = id;
 	}
 
 	public long getId() {

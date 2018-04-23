@@ -16,11 +16,12 @@ public class Payment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
+	private double sum;
+	private Timestamp date;
+
 	@ManyToOne
 	@JoinColumn(name = "resident", nullable = false)
 	private Resident resident;
-	private double sum;
-	private Timestamp date;
 
 	public Payment(Resident resident, double sum, Timestamp date) {
 		super();

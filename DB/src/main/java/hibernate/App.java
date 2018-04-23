@@ -4,7 +4,7 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Iterator;
 
-import model.Resident;
+import model.Payment;
 
 /**
  * hiberante
@@ -37,10 +37,10 @@ public class App {
 		//
 		// System.out.println();
 
-		Collection<Resident> items = Factory.getInstance().getResidentDAO().getAllItems();
-		Iterator<Resident> itemIterator = items.iterator();
+		Collection<Payment> items = Factory.getInstance().getPaymentDAO().getAllItems();
+		Iterator<Payment> itemIterator = items.iterator();
 		while (itemIterator.hasNext()) {
-			Resident item = (Resident) itemIterator.next();
+			Payment item = (Payment) itemIterator.next();
 			System.out.println(item.toString());
 		}
 

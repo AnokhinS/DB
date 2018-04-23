@@ -7,7 +7,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -18,7 +17,7 @@ public class Personal {
 	@Column(name = "personal_id")
 	private long id;
 	private String name;
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "profession", nullable = false)
 	private Profession profession;
 
