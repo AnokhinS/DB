@@ -1,10 +1,9 @@
 package hibernate;
 
+import java.lang.reflect.Field;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.Iterator;
 
-import model.Payment;
+import model.Faculty;
 
 /**
  * hiberante
@@ -37,13 +36,23 @@ public class App {
 		//
 		// System.out.println();
 
-		Collection<Payment> items = Factory.getInstance().getPaymentDAO().getAllItems();
-		Iterator<Payment> itemIterator = items.iterator();
-		while (itemIterator.hasNext()) {
-			Payment item = (Payment) itemIterator.next();
-			System.out.println(item.toString());
-		}
+		// Collection<Payment> items =
+		// Factory.getInstance().getPaymentDAO().getAllItems();
+		// Iterator<Payment> itemIterator = items.iterator();
+		// while (itemIterator.hasNext()) {
+		// Payment item = (Payment) itemIterator.next();
+		// System.out.println(item.toString());
+		// }
 
-		System.out.println();
+		for (Field f : Faculty.class.getDeclaredFields()) {
+			f.setAccessible(true);
+			Object o;
+			try {
+				o = f.get(new Faculty());
+			} catch (Exception e) {
+				o = e;
+			}
+			System.out.println(f.getGenericType() + " " + f.getName() + " = " + o);
+		}
 	}
 }
