@@ -4,11 +4,6 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.SessionFactory;
-import org.hibernate.boot.registry.StandardServiceRegistry;
-import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
-import org.hibernate.cfg.Configuration;
-
 import DAO.IDao;
 import hibernate.Factory;
 import javafx.application.Application;
@@ -32,10 +27,7 @@ import javafx.stage.Stage;
 import model.Faculty;
 
 public class Test extends Application {
-	private final Configuration cfg = new Configuration().configure("hibernate.cfg.xml");
-	private final StandardServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
-			.applySettings(cfg.getProperties()).build();
-	private final SessionFactory sf = cfg.configure().buildSessionFactory(serviceRegistry);
+
 	private Stage primaryStage;
 	private IDao<Faculty> dao = Factory.getInstance().getFacultyDAO();
 

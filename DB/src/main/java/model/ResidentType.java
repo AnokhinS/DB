@@ -44,11 +44,11 @@ public class ResidentType {
 		this.id = id;
 	}
 
-	public String getResident_type() {
+	public String getName() {
 		return residentType;
 	}
 
-	public void setResident_type(String resident_type) {
+	public void setName(String resident_type) {
 		this.residentType = resident_type;
 	}
 }

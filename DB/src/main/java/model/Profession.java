@@ -8,7 +8,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "profession")
+@Table(name = "professions")
 public class Profession {
 	public Profession(String profession) {
 		super();
@@ -38,11 +38,11 @@ public class Profession {
 		this.id = id;
 	}
 
-	public String getProfession() {
+	public String getName() {
 		return profession;
 	}
 
-	public void setProfession(String profession) {
+	public void setName(String profession) {
 		this.profession = profession;
 	}
 

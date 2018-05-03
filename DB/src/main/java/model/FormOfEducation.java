@@ -10,21 +10,16 @@ import javax.persistence.Table;
 @Entity
 @Table(name = "form_of_education")
 public class FormOfEducation {
-	public FormOfEducation(long id) {
-		super();
-		this.id = id;
-	}
-
-	@Override
-	public String toString() {
-		return "FormOfEducation [id=" + id + ", foe=" + foe + "]";
-	}
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "foe_id")
 	private long id;
 	private String foe;
+
+	public FormOfEducation(long id) {
+		super();
+		this.id = id;
+	}
 
 	public FormOfEducation(String foe) {
 		super();
@@ -43,11 +38,16 @@ public class FormOfEducation {
 		this.id = id;
 	}
 
-	public String getFoe() {
+	public String getName() {
 		return foe;
 	}
 
-	public void setFoe(String foe) {
+	public void setName(String foe) {
 		this.foe = foe;
+	}
+
+	@Override
+	public String toString() {
+		return "FormOfEducation [id=" + id + ", foe=" + foe + "]";
 	}
 }

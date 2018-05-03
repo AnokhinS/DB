@@ -18,7 +18,6 @@ public class Room {
 	private long id;
 	@Column(name = "room_number")
 	private long roomNumber;
-	private long floor;
 	@Column(name = "free_spots")
 	private long freeSpots;
 
@@ -35,17 +34,16 @@ public class Room {
 		this.id = id;
 	}
 
-	public Room(long roomNumber, long floor, long freeSpots, StudentHouse studentHouse) {
+	public Room(long roomNumber, long freeSpots, StudentHouse studentHouse) {
 		super();
 		this.roomNumber = roomNumber;
-		this.floor = floor;
 		this.freeSpots = freeSpots;
 		this.studentHouse = studentHouse;
 	}
 
 	@Override
 	public String toString() {
-		return "Room [id=" + id + ", roomNumber=" + roomNumber + ", floor=" + floor + ", freeSpots=" + freeSpots + "]";
+		return "Room [id=" + id + ", roomNumber=" + roomNumber + ", freeSpots=" + freeSpots + "]";
 	}
 
 	public long getId() {
@@ -62,14 +60,6 @@ public class Room {
 
 	public void setRoomNumber(long roomNumber) {
 		this.roomNumber = roomNumber;
-	}
-
-	public long getFloor() {
-		return floor;
-	}
-
-	public void setFloor(long floor) {
-		this.floor = floor;
 	}
 
 	public long getFreeSpots() {
