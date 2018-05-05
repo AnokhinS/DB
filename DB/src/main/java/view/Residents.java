@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import DAO.IDao;
 import hibernate.Factory;
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -34,7 +33,7 @@ import model.Resident;
 import model.ResidentType;
 import model.Room;
 
-public class Test extends Application {
+public class Residents {
 
 	private Stage primaryStage;
 	private IDao<Resident> mainDao = Factory.getInstance().getResidentDAO();
@@ -43,38 +42,10 @@ public class Test extends Application {
 			Factory.getInstance().getRoomDAO() };
 	private String order = "id";
 
-	@Override
-	public void start(Stage stage) {
-		primaryStage = stage;
-		try {
-			startApp();
-		} catch (SQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-		primaryStage.setOnCloseRequest(e -> {
-			Platform.exit();
-			System.exit(0);
-		});
-	}
-
-	void startApp() throws SQLException {
-
-		Button create = new Button();
-		create.setText("Add resident");
-
-		create.setOnAction(event -> {
-			try {
-				create();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});
+	public void startApp() throws SQLException {
+		primaryStage = new Stage();
 
 		List<Resident> data = read();
-		VBox vbox = new VBox(10);
-		vbox.setPadding(new Insets(20));
 
 		Label[] labels = { new Label("id"), new Label("name"), new Label("sex"), new Label("phone"), new Label("age"),
 				new Label("residentType"), new Label("formOfEducation"), new Label("faculty"), new Label("Address"),
@@ -85,6 +56,7 @@ public class Test extends Application {
 				l.setOnMouseClicked(event -> {
 					order = l.getText();
 					try {
+						primaryStage.hide();
 						startApp();
 					} catch (SQLException e) {
 						// TODO Auto-generated catch block
@@ -92,6 +64,7 @@ public class Test extends Application {
 					}
 				});
 		}
+
 		GridPane gridPane = new GridPane();
 		gridPane.setHgap(30);
 		gridPane.setVgap(10);
@@ -137,6 +110,19 @@ public class Test extends Application {
 			i++;
 		}
 
+		Button create = new Button();
+		create.setText("Add resident");
+		create.setOnAction(event -> {
+			try {
+				create();
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+
+		VBox vbox = new VBox(10);
+		vbox.setPadding(new Insets(20));
 		vbox.getChildren().addAll(create, gridPane);
 
 		StackPane root = new StackPane();
@@ -144,11 +130,9 @@ public class Test extends Application {
 
 		Scene scene = new Scene(root);
 
-		primaryStage.setTitle("Student House Database");
+		primaryStage.setTitle("Residents");
 		primaryStage.setScene(scene);
-		primaryStage.hide();
 		primaryStage.show();
-
 	}
 
 	public void create() throws SQLException {
@@ -170,6 +154,16 @@ public class Test extends Application {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (!newValue.matches("\\d{0,2}")) {
+					Platform.runLater(() -> {
+						fields[1].setText(newValue.replaceAll("[\\w]", ""));
+					});
+				}
+			}
+		});
+		fields[2].textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				if (!newValue.matches("\\d{0,11}")) {
 					Platform.runLater(() -> {
 						fields[1].setText(newValue.replaceAll("[\\w]", ""));
 					});
@@ -265,6 +259,16 @@ public class Test extends Application {
 				}
 			}
 		});
+		fields[2].textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
+				if (!newValue.matches("\\d{0,11}")) {
+					Platform.runLater(() -> {
+						fields[1].setText(newValue.replaceAll("[\\w]", ""));
+					});
+				}
+			}
+		});
 		fields[0].setPromptText("New resident's name");
 		fields[1].setPromptText("New resident's age");
 		fields[2].setPromptText("New resident's phone");
@@ -341,10 +345,6 @@ public class Test extends Application {
 			mainDao.deleteItem(item);
 			startApp();
 		}
-	}
-
-	public static void main(String[] args) {
-		launch(args);
 	}
 
 }
