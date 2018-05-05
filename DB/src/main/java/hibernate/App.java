@@ -1,8 +1,6 @@
 package hibernate;
 
-import java.util.Collection;
-
-import model.StudentHouse;
+import javafx.scene.control.ComboBox;
 
 /**
  * hiberante
@@ -10,9 +8,10 @@ import model.StudentHouse;
  */
 public class App {
 	public static void main(String[] args) throws Exception {
-		Collection<StudentHouse> list = Factory.getInstance().getStudentHouseDAO().getAllItems();
-		for (StudentHouse f : list)
-			System.out.println(f.toString());
+		String[] t = { "a", "b" };
+		ComboBox<String> cb = new ComboBox<String>();
+		c;
+	
 	}
 
 }

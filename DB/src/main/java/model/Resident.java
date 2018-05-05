@@ -27,7 +27,7 @@ public class Resident {
 	private String phone;
 	@ManyToOne
 	@JoinColumn(name = "resident_type", nullable = false)
-	private ResidentType resType;
+	private ResidentType residentType;
 	@ManyToOne
 	@JoinColumn(name = "room", nullable = false)
 	private Room room;
@@ -37,7 +37,7 @@ public class Resident {
 	private Faculty faculty;
 	@ManyToOne
 	@JoinColumn(name = "form_of_education", nullable = false)
-	private FormOfEducation foe;
+	private FormOfEducation formOfEducation;
 	@OneToMany(mappedBy = "resident", fetch = FetchType.EAGER)
 	private Set<Payment> payments;
 
@@ -48,8 +48,8 @@ public class Resident {
 	@Override
 	public String toString() {
 		return "Resident [id=" + id + ", name=" + name + ", sex=" + sex + ", age=" + age + ", phone=" + phone
-				+ ", resType=" + resType + ", room=" + room + ", balance=" + balance + ", faculty=" + faculty + ", foe="
-				+ foe + ", payments=" + payments + "]";
+				+ ", resType=" + residentType + ", room=" + room + ", balance=" + balance + ", faculty=" + faculty + ", foe="
+				+ formOfEducation + ", payments=" + payments + "]";
 	}
 
 	public Set<Payment> getPayments() {
@@ -60,17 +60,17 @@ public class Resident {
 		this.payments = payments;
 	}
 
-	public Resident(String name, String sex, int age, String phone, ResidentType resType, Room room, Faculty faculty,
-			FormOfEducation foe) {
+	public Resident(String name, int age, String phone, String sex, ResidentType resType, FormOfEducation foe,
+			Faculty faculty, Room room) {
 		super();
 		this.name = name;
 		this.sex = sex;
 		this.age = age;
 		this.phone = phone;
-		this.resType = resType;
+		this.residentType = resType;
 		this.room = room;
 		this.faculty = faculty;
-		this.foe = foe;
+		this.formOfEducation = foe;
 	}
 
 	public Resident(long id) {
@@ -119,11 +119,11 @@ public class Resident {
 	}
 
 	public ResidentType getResType() {
-		return resType;
+		return residentType;
 	}
 
 	public void setResType(ResidentType resType) {
-		this.resType = resType;
+		this.residentType = resType;
 	}
 
 	public Room getRoom() {
@@ -151,10 +151,10 @@ public class Resident {
 	}
 
 	public FormOfEducation getFoe() {
-		return foe;
+		return formOfEducation;
 	}
 
 	public void setFoe(FormOfEducation foe) {
-		this.foe = foe;
+		this.formOfEducation = foe;
 	}
 }

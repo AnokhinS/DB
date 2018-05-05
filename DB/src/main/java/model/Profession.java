@@ -9,35 +9,31 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "professions")
-public class Profession {
-	public Profession(String profession) {
-		super();
-		this.profession = profession;
-	}
-
+public class Profession implements Option {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "profession_id")
-	private long id;
+	private int id;
 	private String profession;
 
 	public Profession() {
 		super();
 	}
 
-	public Profession(long id) {
+	public Profession(int id) {
 		super();
 		this.id = id;
 	}
 
-	public long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
+	@Override
 	public String getName() {
 		return profession;
 	}

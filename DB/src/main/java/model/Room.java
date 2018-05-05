@@ -11,30 +11,38 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "rooms")
-public class Room {
+public class Room implements Option {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "room_id")
-	private long id;
+	private int id;
 	@Column(name = "room_number")
-	private long roomNumber;
+	private int roomNumber;
 	@Column(name = "free_spots")
-	private long freeSpots;
+	private int freeSpots;
 
 	@ManyToOne
 	@JoinColumn(name = "student_house", nullable = false)
 	private StudentHouse studentHouse;
 
+	public StudentHouse getStudentHouse() {
+		return studentHouse;
+	}
+
+	public void setStudentHouse(StudentHouse studentHouse) {
+		this.studentHouse = studentHouse;
+	}
+
 	public Room() {
 		super();
 	}
 
-	public Room(long id) {
+	public Room(int id) {
 		super();
 		this.id = id;
 	}
 
-	public Room(long roomNumber, long freeSpots, StudentHouse studentHouse) {
+	public Room(int roomNumber, int freeSpots, StudentHouse studentHouse) {
 		super();
 		this.roomNumber = roomNumber;
 		this.freeSpots = freeSpots;
@@ -46,11 +54,11 @@ public class Room {
 		return "Room [id=" + id + ", roomNumber=" + roomNumber + ", freeSpots=" + freeSpots + "]";
 	}
 
-	public long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
@@ -58,7 +66,7 @@ public class Room {
 		return roomNumber;
 	}
 
-	public void setRoomNumber(long roomNumber) {
+	public void setRoomNumber(int roomNumber) {
 		this.roomNumber = roomNumber;
 	}
 
@@ -66,7 +74,13 @@ public class Room {
 		return freeSpots;
 	}
 
-	public void setFreeSpots(long freeSpots) {
+	public void setFreeSpots(int freeSpots) {
 		this.freeSpots = freeSpots;
+	}
+
+	@Override
+	public String getName() {
+		return String.valueOf(roomNumber);
+
 	}
 }

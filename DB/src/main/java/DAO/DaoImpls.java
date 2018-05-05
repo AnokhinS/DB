@@ -7,7 +7,9 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Order;
 
+import model.Option;
 import util.HibernateUtil;
 
 public class DaoImpls<T> implements IDao<T> {
@@ -17,12 +19,39 @@ public class DaoImpls<T> implements IDao<T> {
 		classType = type;
 	}
 
+	public <T extends Option> String[] items() throws SQLException {
+		List<T> items = (List<T>) getAllItems();
+		String[] res = new String[items.size()];
+		for (int i = 0; i < res.length; i++)
+			res[i] = items.get(i).getId() + "-" + items.get(i).getName();
+		return res;
+	}
+
 	public Collection<T> getAllItems() throws SQLException {
 		Session session = null;
 		List<T> items = new ArrayList<T>();
 		try {
 			session = HibernateUtil.getSessionFactory().openSession();
-			items = session.createCriteria(classType).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+			items = session.createCriteria(classType).addOrder(Order.asc("id"))
+					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (session != null && session.isOpen()) {
+				session.close();
+			}
+		}
+		return items;
+	}
+
+	public Collection<T> getAllItems(String s) {
+		Session session = null;
+		List<T> items = new ArrayList<T>();
+		try {
+			session = HibernateUtil.getSessionFactory().openSession();
+			items = session.createCriteria(classType).addOrder(Order.asc(s))
+					.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
 
 		} catch (Exception e) {
 			e.printStackTrace();

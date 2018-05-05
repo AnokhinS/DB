@@ -3,6 +3,8 @@ package DAO;
 import java.sql.SQLException;
 import java.util.Collection;
 
+import model.Option;
+
 public interface IDao<T> {
 	public void addItem(T item) throws SQLException;
 
@@ -14,4 +16,7 @@ public interface IDao<T> {
 
 	public void deleteItem(T item) throws SQLException;
 
+	public <T extends Option> String[] items() throws SQLException;
+
+	public Collection<T> getAllItems(String order);
 }

@@ -9,22 +9,17 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "resident_types")
-public class ResidentType {
+public class ResidentType implements Option {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "resident_type_id")
-	private long id;
+	private int id;
 	@Column(name = "resident_type")
 	private String residentType;
 
-	public ResidentType(long id) {
+	public ResidentType(int id) {
 		super();
 		this.id = id;
-	}
-
-	public ResidentType(String resident_type) {
-		super();
-		this.residentType = resident_type;
 	}
 
 	public ResidentType() {
@@ -36,14 +31,15 @@ public class ResidentType {
 		return "ResidentType [id=" + id + ", resident_type=" + residentType + "]";
 	}
 
-	public long getId() {
+	public int getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(int id) {
 		this.id = id;
 	}
 
+	@Override
 	public String getName() {
 		return residentType;
 	}
