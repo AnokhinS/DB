@@ -1,8 +1,10 @@
 package view;
 
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
+
+import org.hibernate.exception.GenericJDBCException;
+import org.postgresql.util.PSQLException;
 
 import DAO.IDao;
 import hibernate.Factory;
@@ -11,7 +13,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -19,6 +20,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
@@ -33,7 +35,7 @@ import model.Resident;
 import model.ResidentType;
 import model.Room;
 
-public class Residents {
+public class ResidentView {
 
 	private Stage primaryStage;
 	private IDao<Resident> mainDao = Factory.getInstance().getResidentDAO();
@@ -42,7 +44,7 @@ public class Residents {
 			Factory.getInstance().getRoomDAO() };
 	private String order = "id";
 
-	public void startApp() throws SQLException {
+	public void startApp() {
 		primaryStage = new Stage();
 
 		List<Resident> data = read();
@@ -55,13 +57,9 @@ public class Residents {
 					|| l.getText().equals("formOfEducation") || l.getText().equals("faculty")))
 				l.setOnMouseClicked(event -> {
 					order = l.getText();
-					try {
-						primaryStage.hide();
-						startApp();
-					} catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					primaryStage.hide();
+					startApp();
+
 				});
 		}
 
@@ -88,20 +86,11 @@ public class Residents {
 					new Label(String.valueOf(item.getBalance())) };
 			Button edit = new Button("Edit");
 			edit.setOnAction(event -> {
-				try {
-					update(item.getId());
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				update(item.getId());
 			});
 			Button delete = new Button("Delete");
 			delete.setOnAction(event -> {
-				try {
-					delete(item.getId());
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
+				delete(item.getId());
 			});
 			for (int j = 0; j < localLabels.length; j++)
 				gridPane.add(localLabels[j], j, i, 1, 1);
@@ -113,12 +102,8 @@ public class Residents {
 		Button create = new Button();
 		create.setText("Add resident");
 		create.setOnAction(event -> {
-			try {
-				create();
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			primaryStage.hide();
+			create();
 		});
 
 		VBox vbox = new VBox(10);
@@ -135,27 +120,30 @@ public class Residents {
 		primaryStage.show();
 	}
 
-	public void create() throws SQLException {
+	public void create() {
 		String[] attr = { "Enter resident's name", "Enter resident's age", "Enter resident's phone",
 				"Select resident's sex", "Select resident's type", "Select resident's form of education",
 				"Select resident's faculty", "Select resident's room" };
 		Stage createStage = new Stage();
 		StackPane root = new StackPane();
 		Scene scene = new Scene(root);
-		Text[] text = new Text[8];
+		Text[] text = new Text[attr.length];
+		TextArea area = new TextArea();
 		for (int i = 0; i < text.length; i++) {
 			text[i] = new Text(attr[i]);
 		}
 		TextField[] fields = new TextField[3];
 		for (int i = 0; i < fields.length; i++) {
 			fields[i] = new TextField();
+			fields[i].setPromptText(attr[i]);
 		}
 		fields[1].textProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (!newValue.matches("\\d{0,2}")) {
 					Platform.runLater(() -> {
-						fields[1].setText(newValue.replaceAll("[\\w]", ""));
+						fields[1].setText(newValue.replaceAll(newValue, oldValue));
+
 					});
 				}
 			}
@@ -165,28 +153,22 @@ public class Residents {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (!newValue.matches("\\d{0,11}")) {
 					Platform.runLater(() -> {
-						fields[1].setText(newValue.replaceAll("[\\w]", ""));
+						fields[2].setText(newValue.replaceAll(newValue, oldValue));
 					});
 				}
 			}
 		});
-		fields[0].setPromptText("Enter resident's name");
-		fields[1].setPromptText("Enter resident's age");
-		fields[2].setPromptText("Enter resident's phone");
 
-		String[][] options = null;
-		options = new String[5][utilDao[1].getAllItems().size()];
-		options[0] = new String[] { "М", "Ж" };
-		final ComboBox[] comboBoxes = new ComboBox[5];
+		String[] options = { "М", "Ж" };
+		ComboBox[] comboBoxes = new ComboBox[5];
 		for (int i = 0; i < comboBoxes.length; i++) {
 			comboBoxes[i] = new ComboBox<>();
 			comboBoxes[i].setPromptText(attr[i + 3]);
 			if (i > 0) {
-				String[] tmp = utilDao[i - 1].items();
-				comboBoxes[i].getItems().addAll(tmp);
+				comboBoxes[i].getItems().addAll(utilDao[i - 1].items());
 			}
 		}
-		comboBoxes[0].getItems().addAll(options[0]);
+		comboBoxes[0].getItems().addAll(options);
 
 		VBox vbox = new VBox(10);
 		for (int i = 0; i < text.length; i++) {
@@ -201,23 +183,27 @@ public class Residents {
 		savebtn.setTooltip(new Tooltip("Save"));
 
 		savebtn.setOnAction(event -> {
+
+			int[] id = new int[comboBoxes.length - 1];
+			for (int i = 0; i < id.length; i++) {
+				String s = (String) comboBoxes[i + 1].getValue();
+				id[i] = Integer.valueOf(s.split("-")[0]);
+			}
 			try {
-				int[] id = new int[comboBoxes.length - 1];
-				for (int i = 0; i < id.length; i++) {
-					String s = (String) comboBoxes[i + 1].getValue();
-					id[i] = Integer.valueOf(s.split("-")[0]);
-				}
 				mainDao.addItem(new Resident(fields[0].getText(), (int) Integer.valueOf(fields[1].getText()),
 						fields[2].getText(), (String) comboBoxes[0].getValue(), new ResidentType(id[0]),
 						new FormOfEducation(id[1]), new Faculty(id[2]), new Room(id[3])));
+				createStage.hide();
 				startApp();
-			} catch (SQLException e1) {
+
+			} catch (PSQLException | GenericJDBCException e1) {
+				area.appendText(e1.getCause().getMessage() + "\n");
 				e1.printStackTrace();
 			}
-			((Node) event.getSource()).getScene().getWindow().hide();
+
 		});
 
-		vbox.getChildren().add(savebtn);
+		vbox.getChildren().addAll(savebtn, area);
 
 		vbox.setPadding(new Insets(10));
 		root.getChildren().add(vbox);
@@ -227,20 +213,21 @@ public class Residents {
 		createStage.show();
 	}
 
-	public List<Resident> read() throws SQLException {
-		List<Resident> data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order);
+	public List<Resident> read() {
+		List<Resident> data = null;
+		data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order);
 		return data;
 	}
 
-	public void update(long l) throws SQLException {
+	public void update(long l) {
 		String[] attr = { "New resident's name", "New resident's age", "New resident's phone", "New resident's sex",
 				"New resident's type", "New resident's form of education", "New resident's faculty",
 				"New resident's room" };
-		Resident item = mainDao.getItemById(l);
+
 		Stage updateStage = new Stage();
 		StackPane root = new StackPane();
 		Scene scene = new Scene(root);
-
+		TextArea area = new TextArea();
 		Text[] text = new Text[8];
 		for (int i = 0; i < text.length; i++) {
 			text[i] = new Text(attr[i]);
@@ -248,13 +235,14 @@ public class Residents {
 		TextField[] fields = new TextField[3];
 		for (int i = 0; i < fields.length; i++) {
 			fields[i] = new TextField();
+			fields[i].setPromptText(attr[i]);
 		}
 		fields[1].textProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (!newValue.matches("\\d{0,2}")) {
 					Platform.runLater(() -> {
-						fields[1].setText(newValue.replaceAll("[\\w]", ""));
+						fields[1].setText(newValue.replaceAll(newValue, oldValue));
 					});
 				}
 			}
@@ -264,28 +252,22 @@ public class Residents {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (!newValue.matches("\\d{0,11}")) {
 					Platform.runLater(() -> {
-						fields[1].setText(newValue.replaceAll("[\\w]", ""));
+						fields[2].setText(newValue.replaceAll(newValue, oldValue));
 					});
 				}
 			}
 		});
-		fields[0].setPromptText("New resident's name");
-		fields[1].setPromptText("New resident's age");
-		fields[2].setPromptText("New resident's phone");
 
-		String[][] options = null;
-		options = new String[5][utilDao[1].getAllItems().size()];
-		options[0] = new String[] { "М", "Ж" };
-		final ComboBox[] comboBoxes = new ComboBox[5];
+		String[] options = { "М", "Ж" };
+		ComboBox[] comboBoxes = new ComboBox[5];
 		for (int i = 0; i < comboBoxes.length; i++) {
 			comboBoxes[i] = new ComboBox<>();
 			comboBoxes[i].setPromptText(attr[i + 3]);
 			if (i > 0) {
-				String[] tmp = utilDao[i - 1].items();
-				comboBoxes[i].getItems().addAll(tmp);
+				comboBoxes[i].getItems().addAll(utilDao[i - 1].items());
 			}
 		}
-		comboBoxes[0].getItems().addAll(options[0]);
+		comboBoxes[0].getItems().addAll(options);
 
 		VBox vbox = new VBox(10);
 		for (int i = 0; i < text.length; i++) {
@@ -300,30 +282,34 @@ public class Residents {
 		savebtn.setTooltip(new Tooltip("Save"));
 
 		savebtn.setOnAction(event -> {
+
 			int[] id = new int[comboBoxes.length - 1];
 			for (int i = 0; i < id.length; i++) {
 				String s = (String) comboBoxes[i + 1].getValue();
 				id[i] = Integer.valueOf(s.split("-")[0]);
 			}
-			item.setName(fields[0].getText());
-			item.setAge((int) Integer.valueOf(fields[1].getText()));
-			item.setPhone(fields[2].getText());
-			item.setSex((String) comboBoxes[0].getValue());
-			item.setResType(new ResidentType(id[0]));
-			item.setFoe(new FormOfEducation(id[1]));
-			item.setFaculty(new Faculty(id[2]));
-			item.setRoom(new Room(id[3]));
 			try {
+				Resident item = mainDao.getItemById(l);
+				item.setName(fields[0].getText());
+				item.setAge((int) Integer.valueOf(fields[1].getText()));
+				item.setPhone(fields[2].getText());
+				item.setSex((String) comboBoxes[0].getValue());
+				item.setResType(new ResidentType(id[0]));
+				item.setFoe(new FormOfEducation(id[1]));
+				item.setFaculty(new Faculty(id[2]));
+				item.setRoom(new Room(id[3]));
 				mainDao.updateItem(item);
-				startApp();
-			} catch (SQLException e1) {
-				e1.printStackTrace();
+			} catch (PSQLException e) {
+				area.appendText(e.getCause().getCause().getMessage() + "\n");
+				e.printStackTrace();
 			}
-			((Node) (event.getSource())).getScene().getWindow().hide();
+			primaryStage.hide();
+			updateStage.hide();
+			startApp();
+
 		});
 
-		vbox.getChildren().add(savebtn);
-
+		vbox.getChildren().addAll(savebtn, area);
 		vbox.setPadding(new Insets(10));
 		root.getChildren().add(vbox);
 
@@ -332,8 +318,14 @@ public class Residents {
 		updateStage.show();
 	}
 
-	public void delete(long l) throws SQLException {
-		Resident item = mainDao.getItemById(l);
+	public void delete(long l) {
+		Resident item = null;
+		try {
+			item = mainDao.getItemById(l);
+		} catch (PSQLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle("Deleting " + item.getName());
@@ -342,7 +334,13 @@ public class Residents {
 		Optional result = alert.showAndWait();
 
 		if (result.get() == ButtonType.OK) {
-			mainDao.deleteItem(item);
+			primaryStage.hide();
+			try {
+				mainDao.deleteItem(item);
+			} catch (PSQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			startApp();
 		}
 	}

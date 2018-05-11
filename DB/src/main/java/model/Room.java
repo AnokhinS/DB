@@ -15,11 +15,11 @@ public class Room implements Option {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "room_id")
-	private int id;
+	private long id;
 	@Column(name = "room_number")
-	private int roomNumber;
+	private long roomNumber;
 	@Column(name = "free_spots")
-	private int freeSpots;
+	private long freeSpots;
 
 	@ManyToOne
 	@JoinColumn(name = "student_house", nullable = false)
@@ -37,12 +37,12 @@ public class Room implements Option {
 		super();
 	}
 
-	public Room(int id) {
+	public Room(long id) {
 		super();
 		this.id = id;
 	}
 
-	public Room(int roomNumber, int freeSpots, StudentHouse studentHouse) {
+	public Room(long roomNumber, long freeSpots, StudentHouse studentHouse) {
 		super();
 		this.roomNumber = roomNumber;
 		this.freeSpots = freeSpots;
@@ -54,11 +54,11 @@ public class Room implements Option {
 		return "Room [id=" + id + ", roomNumber=" + roomNumber + ", freeSpots=" + freeSpots + "]";
 	}
 
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 
@@ -66,7 +66,7 @@ public class Room implements Option {
 		return roomNumber;
 	}
 
-	public void setRoomNumber(int roomNumber) {
+	public void setRoomNumber(long roomNumber) {
 		this.roomNumber = roomNumber;
 	}
 
@@ -74,7 +74,7 @@ public class Room implements Option {
 		return freeSpots;
 	}
 
-	public void setFreeSpots(int freeSpots) {
+	public void setFreeSpots(long freeSpots) {
 		this.freeSpots = freeSpots;
 	}
 

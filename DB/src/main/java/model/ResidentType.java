@@ -13,11 +13,11 @@ public class ResidentType implements Option {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "resident_type_id")
-	private int id;
+	private long id;
 	@Column(name = "resident_type")
 	private String residentType;
 
-	public ResidentType(int id) {
+	public ResidentType(long id) {
 		super();
 		this.id = id;
 	}
@@ -31,11 +31,11 @@ public class ResidentType implements Option {
 		return "ResidentType [id=" + id + ", resident_type=" + residentType + "]";
 	}
 
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 

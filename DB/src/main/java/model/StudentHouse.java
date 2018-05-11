@@ -13,7 +13,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "student_house")
-public class StudentHouse {
+public class StudentHouse implements Option {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "student_house_id")
@@ -65,5 +65,10 @@ public class StudentHouse {
 
 	public void setRooms(Set<Room> rooms) {
 		this.rooms = rooms;
+	}
+
+	@Override
+	public String getName() {
+		return getAddress();
 	}
 }

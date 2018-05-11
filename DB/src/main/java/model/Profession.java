@@ -13,23 +13,23 @@ public class Profession implements Option {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "profession_id")
-	private int id;
+	private long id;
 	private String profession;
 
 	public Profession() {
 		super();
 	}
 
-	public Profession(int id) {
+	public Profession(long id) {
 		super();
 		this.id = id;
 	}
 
-	public int getId() {
+	public long getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 

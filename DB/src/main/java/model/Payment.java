@@ -1,6 +1,6 @@
 package model;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -17,13 +17,13 @@ public class Payment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long id;
 	private double sum;
-	private Timestamp date;
+	private LocalDate date;
 
 	@ManyToOne
 	@JoinColumn(name = "resident", nullable = false)
 	private Resident resident;
 
-	public Payment(Resident resident, double sum, Timestamp date) {
+	public Payment(Resident resident, double sum, LocalDate date) {
 		super();
 		this.resident = resident;
 		this.sum = sum;
@@ -58,11 +58,11 @@ public class Payment {
 		this.sum = sum;
 	}
 
-	public Timestamp getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
 
-	public void setDate(Timestamp date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 

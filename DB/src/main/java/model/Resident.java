@@ -15,7 +15,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "residents")
-public class Resident {
+public class Resident implements Option {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "resident_id")
@@ -48,8 +48,8 @@ public class Resident {
 	@Override
 	public String toString() {
 		return "Resident [id=" + id + ", name=" + name + ", sex=" + sex + ", age=" + age + ", phone=" + phone
-				+ ", resType=" + residentType + ", room=" + room + ", balance=" + balance + ", faculty=" + faculty + ", foe="
-				+ formOfEducation + ", payments=" + payments + "]";
+				+ ", resType=" + residentType + ", room=" + room + ", balance=" + balance + ", faculty=" + faculty
+				+ ", foe=" + formOfEducation + ", payments=" + payments + "]";
 	}
 
 	public Set<Payment> getPayments() {
