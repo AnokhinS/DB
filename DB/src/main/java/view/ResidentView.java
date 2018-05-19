@@ -3,9 +3,6 @@ package view;
 import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.exception.GenericJDBCException;
-import org.postgresql.util.PSQLException;
-
 import DAO.IDao;
 import hibernate.Factory;
 import javafx.application.Platform;
@@ -46,9 +43,7 @@ public class ResidentView {
 
 	public void startApp() {
 		primaryStage = new Stage();
-
 		List<Resident> data = read();
-
 		Label[] labels = { new Label("id"), new Label("name"), new Label("sex"), new Label("phone"), new Label("age"),
 				new Label("residentType"), new Label("formOfEducation"), new Label("faculty"), new Label("Address"),
 				new Label("room"), new Label("balance") };
@@ -59,7 +54,6 @@ public class ResidentView {
 					order = l.getText();
 					primaryStage.hide();
 					startApp();
-
 				});
 		}
 
@@ -74,7 +68,7 @@ public class ResidentView {
 		Separator separator = new Separator();
 		separator.setOrientation(Orientation.HORIZONTAL);
 
-		gridPane.add(separator, 0, 1, 7, 1);
+		gridPane.add(separator, 0, 1, 14, 1);
 
 		int i = 2;
 		for (Resident item : data) {
@@ -102,7 +96,6 @@ public class ResidentView {
 		Button create = new Button();
 		create.setText("Add resident");
 		create.setOnAction(event -> {
-			primaryStage.hide();
 			create();
 		});
 
@@ -112,7 +105,6 @@ public class ResidentView {
 
 		StackPane root = new StackPane();
 		root.getChildren().addAll(vbox);
-
 		Scene scene = new Scene(root);
 
 		primaryStage.setTitle("Residents");
@@ -124,9 +116,7 @@ public class ResidentView {
 		String[] attr = { "Enter resident's name", "Enter resident's age", "Enter resident's phone",
 				"Select resident's sex", "Select resident's type", "Select resident's form of education",
 				"Select resident's faculty", "Select resident's room" };
-		Stage createStage = new Stage();
-		StackPane root = new StackPane();
-		Scene scene = new Scene(root);
+
 		Text[] text = new Text[attr.length];
 		TextArea area = new TextArea();
 		for (int i = 0; i < text.length; i++) {
@@ -142,18 +132,19 @@ public class ResidentView {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (!newValue.matches("\\d{0,2}")) {
 					Platform.runLater(() -> {
-						fields[1].setText(newValue.replaceAll(newValue, oldValue));
+						fields[1].setText(newValue.replace(newValue, oldValue));
 
 					});
 				}
 			}
 		});
+		fields[2].setText("+7");
 		fields[2].textProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				if (!newValue.matches("\\d{0,11}")) {
+				if (!newValue.matches("[\\+0-9]{0,12}")) {
 					Platform.runLater(() -> {
-						fields[2].setText(newValue.replaceAll(newValue, oldValue));
+						fields[2].setText(newValue.replace(newValue, oldValue));
 					});
 				}
 			}
@@ -167,8 +158,10 @@ public class ResidentView {
 			if (i > 0) {
 				comboBoxes[i].getItems().addAll(utilDao[i - 1].items());
 			}
+			comboBoxes[i].getSelectionModel().selectFirst();
 		}
 		comboBoxes[0].getItems().addAll(options);
+		comboBoxes[0].getSelectionModel().selectFirst();
 
 		VBox vbox = new VBox(10);
 		for (int i = 0; i < text.length; i++) {
@@ -179,28 +172,69 @@ public class ResidentView {
 				vbox.getChildren().add(comboBoxes[i - 3]);
 		}
 
+		Stage createStage = new Stage();
+		StackPane root = new StackPane();
+		Scene scene = new Scene(root);
+		scene.getStylesheets().add("view.css");
+
 		Button savebtn = new Button("Save");
 		savebtn.setTooltip(new Tooltip("Save"));
-
 		savebtn.setOnAction(event -> {
+			String name = fields[0].getText();
+			String nameRegex = "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}|" + "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}|"
+					+ "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}";
+			String age = fields[1].getText();
+			String ageRegex = "[1-6][0-9]";
+			String phone = fields[2].getText();
+			String phoneRegex = "\\+7[0-9]{10}";
 
 			int[] id = new int[comboBoxes.length - 1];
 			for (int i = 0; i < id.length; i++) {
 				String s = (String) comboBoxes[i + 1].getValue();
 				id[i] = Integer.valueOf(s.split("-")[0]);
 			}
-			try {
-				mainDao.addItem(new Resident(fields[0].getText(), (int) Integer.valueOf(fields[1].getText()),
-						fields[2].getText(), (String) comboBoxes[0].getValue(), new ResidentType(id[0]),
-						new FormOfEducation(id[1]), new Faculty(id[2]), new Room(id[3])));
-				createStage.hide();
-				startApp();
 
-			} catch (PSQLException | GenericJDBCException e1) {
-				area.appendText(e1.getCause().getMessage() + "\n");
-				e1.printStackTrace();
+			boolean checker = true;
+			if (!name.matches(nameRegex)) {
+				area.appendText("Неверный формат имени\n");
+				fields[0].getStyleClass().add("error");
+				checker = false;
+			} else {
+				fields[0].getStyleClass().remove("error");
+			}
+			if (!age.matches(ageRegex)) {
+				area.appendText("Некорректный возраст\n");
+				fields[1].getStyleClass().add("error");
+				checker = false;
+			} else {
+				fields[1].getStyleClass().remove("error");
+			}
+			if (!phone.matches(phoneRegex)) {
+				area.appendText("Неверный формат номера телефона\n");
+				fields[2].getStyleClass().add("error");
+				checker = false;
+			} else {
+				fields[2].getStyleClass().remove("error");
 			}
 
+			if (checker) {
+				for (TextField tf : fields)
+					tf.getStyleClass().remove("error");
+				try {
+
+					Resident item = new Resident(name, (int) Integer.valueOf(age), phone,
+							(String) comboBoxes[0].getValue(), new ResidentType(id[0]), new FormOfEducation(id[1]),
+							new Faculty(id[2]), new Room(id[3]));
+					mainDao.addItem(item);
+					primaryStage.hide();
+					createStage.hide();
+					startApp();
+				} catch (Exception e1) {
+					while (e1.getCause() != null)
+						e1 = (Exception) e1.getCause();
+					area.appendText(e1.getMessage().split("Где")[0] + "\n");
+				}
+			}
 		});
 
 		vbox.getChildren().addAll(savebtn, area);
@@ -214,8 +248,7 @@ public class ResidentView {
 	}
 
 	public List<Resident> read() {
-		List<Resident> data = null;
-		data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order);
+		List<Resident> data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order);
 		return data;
 	}
 
@@ -223,10 +256,7 @@ public class ResidentView {
 		String[] attr = { "New resident's name", "New resident's age", "New resident's phone", "New resident's sex",
 				"New resident's type", "New resident's form of education", "New resident's faculty",
 				"New resident's room" };
-
-		Stage updateStage = new Stage();
-		StackPane root = new StackPane();
-		Scene scene = new Scene(root);
+		Resident item = mainDao.getItemById(l);
 		TextArea area = new TextArea();
 		Text[] text = new Text[8];
 		for (int i = 0; i < text.length; i++) {
@@ -242,7 +272,7 @@ public class ResidentView {
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
 				if (!newValue.matches("\\d{0,2}")) {
 					Platform.runLater(() -> {
-						fields[1].setText(newValue.replaceAll(newValue, oldValue));
+						fields[1].setText(newValue.replace(newValue, oldValue));
 					});
 				}
 			}
@@ -250,13 +280,16 @@ public class ResidentView {
 		fields[2].textProperty().addListener(new ChangeListener<String>() {
 			@Override
 			public void changed(ObservableValue<? extends String> observable, String oldValue, String newValue) {
-				if (!newValue.matches("\\d{0,11}")) {
+				if (!newValue.matches("[\\+0-9]{0,12}")) {
 					Platform.runLater(() -> {
-						fields[2].setText(newValue.replaceAll(newValue, oldValue));
+						fields[2].setText(newValue.replace(newValue, oldValue));
 					});
 				}
 			}
 		});
+		fields[0].setText(item.getName());
+		fields[1].setText(String.valueOf(item.getAge()));
+		fields[2].setText(item.getPhone());
 
 		String[] options = { "М", "Ж" };
 		ComboBox[] comboBoxes = new ComboBox[5];
@@ -269,6 +302,12 @@ public class ResidentView {
 		}
 		comboBoxes[0].getItems().addAll(options);
 
+		comboBoxes[0].getSelectionModel().select(item.getSex());
+		comboBoxes[1].getSelectionModel().select(item.getResType().getId() + "-" + item.getResType().getName());
+		comboBoxes[2].getSelectionModel().select(item.getFoe().getId() + "-" + item.getFoe().getName());
+		comboBoxes[3].getSelectionModel().select(item.getFaculty().getId() + "-" + item.getFaculty().getName());
+		comboBoxes[4].getSelectionModel().select(item.getRoom().getId() + "-" + item.getRoom().getName());
+
 		VBox vbox = new VBox(10);
 		for (int i = 0; i < text.length; i++) {
 			vbox.getChildren().add(text[i]);
@@ -278,35 +317,73 @@ public class ResidentView {
 				vbox.getChildren().add(comboBoxes[i - 3]);
 		}
 
+		Stage updateStage = new Stage();
+		StackPane root = new StackPane();
+		Scene scene = new Scene(root);
+		scene.getStylesheets().add("view.css");
+
 		Button savebtn = new Button("Save");
 		savebtn.setTooltip(new Tooltip("Save"));
-
 		savebtn.setOnAction(event -> {
+			String name = fields[0].getText();
+			String nameRegex = "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}|" + "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}|"
+					+ "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}";
+			String age = fields[1].getText();
+			String ageRegex = "[1-6][0-9]";
+			String phone = fields[2].getText();
+			String phoneRegex = "\\+7[0-9]{10}";
 
 			int[] id = new int[comboBoxes.length - 1];
 			for (int i = 0; i < id.length; i++) {
 				String s = (String) comboBoxes[i + 1].getValue();
 				id[i] = Integer.valueOf(s.split("-")[0]);
 			}
-			try {
-				Resident item = mainDao.getItemById(l);
-				item.setName(fields[0].getText());
-				item.setAge((int) Integer.valueOf(fields[1].getText()));
-				item.setPhone(fields[2].getText());
-				item.setSex((String) comboBoxes[0].getValue());
-				item.setResType(new ResidentType(id[0]));
-				item.setFoe(new FormOfEducation(id[1]));
-				item.setFaculty(new Faculty(id[2]));
-				item.setRoom(new Room(id[3]));
-				mainDao.updateItem(item);
-			} catch (PSQLException e) {
-				area.appendText(e.getCause().getCause().getMessage() + "\n");
-				e.printStackTrace();
-			}
-			primaryStage.hide();
-			updateStage.hide();
-			startApp();
 
+			boolean checker = true;
+			if (!name.matches(nameRegex)) {
+				area.appendText("Неверный формат имени\n");
+				fields[0].getStyleClass().add("error");
+				checker = false;
+			} else {
+				fields[0].getStyleClass().remove("error");
+			}
+			if (!age.matches(ageRegex)) {
+				area.appendText("Некорректный возраст\n");
+				fields[1].getStyleClass().add("error");
+				checker = false;
+			} else {
+				fields[1].getStyleClass().remove("error");
+			}
+			if (!phone.matches(phoneRegex)) {
+				area.appendText("Неверный формат номера телефона\n");
+				fields[2].getStyleClass().add("error");
+				checker = false;
+			} else {
+				fields[2].getStyleClass().remove("error");
+			}
+			if (checker) {
+				for (TextField tf : fields) {
+					tf.getStyleClass().remove("error");
+				}
+				try {
+					item.setName(name);
+					item.setAge((int) Integer.valueOf(age));
+					item.setPhone(phone);
+					item.setSex((String) comboBoxes[0].getValue());
+					item.setResType(new ResidentType(id[0]));
+					item.setFoe(new FormOfEducation(id[1]));
+					item.setFaculty(new Faculty(id[2]));
+					item.setRoom(new Room(id[3]));
+					mainDao.updateItem(item);
+					primaryStage.hide();
+					updateStage.hide();
+					startApp();
+				} catch (Exception e) {
+					while (e.getCause() != null)
+						e = (Exception) e.getCause();
+					area.appendText(e.getMessage().split("Где")[0] + "\n");
+				}
+			}
 		});
 
 		vbox.getChildren().addAll(savebtn, area);
@@ -319,28 +396,15 @@ public class ResidentView {
 	}
 
 	public void delete(long l) {
-		Resident item = null;
-		try {
-			item = mainDao.getItemById(l);
-		} catch (PSQLException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
+		Resident item = mainDao.getItemById(l);
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle("Deleting " + item.getName());
 		alert.setHeaderText("Are you Sure, You want to delete " + item.getName());
 		alert.setContentText("This action can't be undone!");
 		Optional result = alert.showAndWait();
-
 		if (result.get() == ButtonType.OK) {
 			primaryStage.hide();
-			try {
-				mainDao.deleteItem(item);
-			} catch (PSQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			mainDao.deleteItem(item);
 			startApp();
 		}
 	}

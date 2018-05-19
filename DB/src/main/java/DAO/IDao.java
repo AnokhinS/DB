@@ -11,9 +11,9 @@ public interface IDao<T> {
 
 	public void updateItem(T item) throws PSQLException;
 
-	public T getItemById(Long id) throws PSQLException;
+	public T getItemById(Long id);
 
-	public void deleteItem(T item) throws PSQLException;
+	public void deleteItem(T item);
 
 	public <T extends Option> String[] items();
 

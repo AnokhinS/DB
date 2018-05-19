@@ -30,6 +30,11 @@ public class Payment {
 		this.date = date;
 	}
 
+	public Payment(long id) {
+		super();
+		this.id = id;
+	}
+
 	public Payment() {
 		super();
 	}

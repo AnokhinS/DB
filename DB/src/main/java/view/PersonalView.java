@@ -3,9 +3,6 @@ package view;
 import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.exception.GenericJDBCException;
-import org.postgresql.util.PSQLException;
-
 import DAO.IDao;
 import hibernate.Factory;
 import javafx.geometry.Insets;
@@ -110,6 +107,7 @@ public class PersonalView {
 		Stage createStage = new Stage();
 		StackPane root = new StackPane();
 		Scene scene = new Scene(root);
+		scene.getStylesheets().add("view.css");
 		Text[] text = new Text[attr.length];
 		TextArea area = new TextArea();
 		for (int i = 0; i < text.length; i++) {
@@ -118,12 +116,12 @@ public class PersonalView {
 		TextField field = new TextField();
 
 		field.setPromptText(attr[0]);
-
 		ComboBox[] comboBoxes = new ComboBox[2];
 		for (int i = 0; i < comboBoxes.length; i++) {
 			comboBoxes[i] = new ComboBox<>();
 			comboBoxes[i].setPromptText(attr[i + 1]);
 			comboBoxes[i].getItems().addAll(utilDao[i].items());
+			comboBoxes[i].getSelectionModel().selectFirst();
 		}
 
 		VBox vbox = new VBox(10);
@@ -139,21 +137,31 @@ public class PersonalView {
 		savebtn.setTooltip(new Tooltip("Save"));
 
 		savebtn.setOnAction(event -> {
-
+			String name = field.getText();
+			String nameRegex = "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}|" + "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}|"
+					+ "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}";
 			int[] id = new int[comboBoxes.length];
-			for (int i = 0; i < id.length; i++) {
-				String s = (String) comboBoxes[i].getValue();
-				id[i] = Integer.valueOf(s.split("-")[0]);
-			}
-			try {
-				mainDao.addItem(new Personal(field.getText(), new Profession(id[0]), new StudentHouse(id[1])));
-				createStage.hide();
-				startApp();
 
-			} catch (PSQLException | GenericJDBCException e1) {
-				area.appendText(e1.getCause().getMessage() + "\n");
-				e1.printStackTrace();
+			boolean checker = true;
+			if (!name.matches(nameRegex)) {
+				area.appendText("Неверный формат имени\n");
+				field.getStyleClass().add("error");
+				checker = false;
+			} else {
+				field.getStyleClass().remove("error");
 			}
+
+			if (checker)
+				try {
+					mainDao.addItem(new Personal(name, new Profession(id[0]), new StudentHouse(id[1])));
+					createStage.hide();
+					startApp();
+
+				} catch (Exception e) {
+					while (e.getCause() != null)
+						e = (Exception) e.getCause();
+					area.appendText(e.getMessage() + "\n");
+				}
 
 		});
 
@@ -185,7 +193,8 @@ public class PersonalView {
 		for (int i = 0; i < text.length; i++) {
 			text[i] = new Text(attr[i]);
 		}
-		TextField field = new TextField();
+		Personal item = mainDao.getItemById(l);
+		TextField field = new TextField(item.getName());
 
 		ComboBox[] comboBoxes = new ComboBox[2];
 		for (int i = 0; i < comboBoxes.length; i++) {
@@ -193,7 +202,9 @@ public class PersonalView {
 			comboBoxes[i].setPromptText(attr[i + 1]);
 			comboBoxes[i].getItems().addAll(utilDao[i].items());
 		}
-
+		comboBoxes[0].getSelectionModel().select(item.getProfession().getId() + "-" + item.getProfession().getName());
+		comboBoxes[1].getSelectionModel()
+				.select(item.getStudentHouse().getId() + "-" + item.getStudentHouse().getName());
 		VBox vbox = new VBox(10);
 		vbox.getChildren().add(text[0]);
 		vbox.getChildren().add(field);
@@ -212,7 +223,6 @@ public class PersonalView {
 				id[i] = Integer.valueOf(s.split("-")[0]);
 			}
 			try {
-				Personal item = mainDao.getItemById(l);
 				item.setName(field.getText());
 				item.setProfession(new Profession(id[0]));
 				item.setStudentHouse(new StudentHouse(id[1]));
@@ -237,13 +247,7 @@ public class PersonalView {
 	}
 
 	public void delete(long l) {
-		Personal item = null;
-		try {
-			item = mainDao.getItemById(l);
-		} catch (PSQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		Personal item = mainDao.getItemById(l);
 
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle("Deleting " + item.getName());
@@ -252,12 +256,7 @@ public class PersonalView {
 		Optional result = alert.showAndWait();
 		if (result.get() == ButtonType.OK) {
 			primaryStage.hide();
-			try {
-				mainDao.deleteItem(item);
-			} catch (PSQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			mainDao.deleteItem(item);
 			startApp();
 		}
 	}

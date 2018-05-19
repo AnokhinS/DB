@@ -3,9 +3,6 @@ package view;
 import java.util.List;
 import java.util.Optional;
 
-import org.hibernate.exception.GenericJDBCException;
-import org.postgresql.util.PSQLException;
-
 import DAO.IDao;
 import hibernate.Factory;
 import javafx.beans.value.ChangeListener;
@@ -113,22 +110,46 @@ public class PaymentView {
 
 		String[] options = null;
 		options = utilDao.items();
-		ComboBox comboBoxes = new ComboBox();
-		comboBoxes.getItems().addAll(options);
+		ComboBox comboBox = new ComboBox();
+		comboBox.getItems().addAll(options);
 
 		DatePicker datePicker = new DatePicker();
 
 		Stage createStage = new Stage();
 		StackPane root = new StackPane();
 		Scene scene = new Scene(root);
-
+		scene.getStylesheets().add("view.css");
 		Button savebtn = new Button("Save");
 		savebtn.setTooltip(new Tooltip("Save"));
 
 		savebtn.setOnAction(event -> {
-			long id;
-			String s = (String) comboBoxes.getValue();
-			id = Long.valueOf(s.split("-")[0]);
+			String s = (String) comboBox.getValue();
+			long id = 0;
+			boolean checker = true;
+			if (s == null) {
+				checker = false;
+				comboBox.getStyleClass().add("error");
+				area.appendText("Выберите проживающего\n");
+			} else {
+				id = Long.valueOf(s.split("-")[0]);
+				comboBox.getStyleClass().remove("error");
+			}
+			if (sum.getText().equals("")) {
+				checker = false;
+				sum.getStyleClass().add("error");
+				area.appendText("Введите сумму платежа\n");
+			} else {
+				sum.getStyleClass().remove("error");
+			}
+
+			if (datePicker.getValue() == null) {
+				checker = false;
+				datePicker.getStyleClass().add("error");
+				area.appendText("Выберите дату\n");
+			} else {
+				datePicker.getStyleClass().remove("error");
+			}
+
 			try {
 				mainDao.addItem(
 						new Payment(new Resident(id), (double) Double.valueOf(sum.getText()), datePicker.getValue()));
@@ -136,9 +157,8 @@ public class PaymentView {
 				primaryStage.hide();
 				startApp();
 
-			} catch (PSQLException | GenericJDBCException e1) {
-				area.appendText(e1.getCause().getMessage() + "\n");
-				e1.printStackTrace();
+			} catch (Exception e) {
+
 			}
 
 		});
@@ -146,7 +166,7 @@ public class PaymentView {
 		VBox vbox = new VBox(10);
 
 		vbox.getChildren().add(text[0]);
-		vbox.getChildren().add(comboBoxes);
+		vbox.getChildren().add(comboBox);
 		vbox.getChildren().add(text[1]);
 		vbox.getChildren().add(sum);
 		vbox.getChildren().add(text[2]);
@@ -177,13 +197,8 @@ public class PaymentView {
 
 		if (result.get() == ButtonType.OK) {
 			primaryStage.hide();
-			try {
-				Payment item = mainDao.getItemById(l);
-				mainDao.deleteItem(item);
-			} catch (PSQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			Payment item = mainDao.getItemById(l);
+			mainDao.deleteItem(item);
 			startApp();
 		}
 	}

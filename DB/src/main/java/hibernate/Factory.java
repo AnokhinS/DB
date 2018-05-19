@@ -94,16 +94,4 @@ public class Factory {
 		return residentDAO;
 	}
 
-	// public IDao getDaoByClass(Class<?> clazz) {
-	// if (clazz == Faculty.class)
-	// return getFacultyDAO();
-	// else if (clazz == FormOfEducation.class)
-	// return getFormOfEducationDAO();
-	// else if (clazz == Profession.class)
-	// return getProfessionDAO();
-	// else if (clazz == ResidentType.class)
-	// return getResidentTypeDAO();
-	// else
-	// return null;
-	// }
 }

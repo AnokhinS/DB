@@ -1,9 +1,12 @@
 package hibernate;
 
 import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.layout.Pane;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import view.PaymentView;
 import view.PersonalView;
@@ -23,40 +26,38 @@ public class App extends javafx.application.Application {
 		primaryStage.setTitle("Student House Database");
 		primaryStage.setMinWidth(600);
 		primaryStage.setMinHeight(600);
+
 		primaryStage.setOnCloseRequest(e -> {
 			Platform.exit();
 			System.exit(0);
 		});
 		Button residents = new Button();
-		residents.setLayoutX(200);
-		residents.setLayoutY(200);
-
 		residents.setText("Residents");
 		residents.setOnAction(event -> {
 			new ResidentView().startApp();
 		});
-
+		residents.setPrefSize(200, 50);
+		residents.setId("dark");
 		Button payments = new Button();
-		payments.setLayoutX(400);
-		payments.setLayoutY(400);
 		payments.setText("Payments");
 		payments.setOnAction(event -> {
 			new PaymentView().startApp();
 		});
-
+		payments.setPrefSize(200, 50);
 		Button personal = new Button();
-		personal.setLayoutX(100);
-		personal.setLayoutY(100);
 		personal.setText("Personal");
 		personal.setOnAction(event -> {
 			new PersonalView().startApp();
 		});
-
-		Pane root = new Pane();
-		root.getChildren().add(residents);
-		root.getChildren().add(payments);
-		root.getChildren().add(personal);
+		personal.setPrefSize(200, 50);
+		GridPane root = new GridPane();
+		root.setAlignment(Pos.CENTER);
+		VBox vbox = new VBox(50);
+		vbox.setPadding(new Insets(20));
+		vbox.getChildren().addAll(residents, payments, personal);
+		root.getChildren().add(vbox);
 		Scene scene = new Scene(root);
+		scene.getStylesheets().add("view.css");
 		primaryStage.setScene(scene);
 		primaryStage.hide();
 		primaryStage.show();
