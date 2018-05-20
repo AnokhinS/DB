@@ -33,16 +33,27 @@ public class PersonalView {
 	private IDao<Personal> mainDao = Factory.getInstance().getPersonalDAO();
 	private IDao[] utilDao = { Factory.getInstance().getProfessionDAO(), Factory.getInstance().getStudentHouseDAO() };
 	private String order = "id";
+	private String property = null;
+	private String value = null;
 
 	public void startApp() {
 		primaryStage = new Stage();
 
 		List<Personal> data = read();
 
-		Label[] labels = { new Label("id"), new Label("name"), new Label("profession"), new Label("studentHouse") };
+		Label[] labels = { new Label("id"), new Label("Имя"), new Label("Профессия"), new Label("Общежитие") };
 		for (Label l : labels) {
 			l.setOnMouseClicked(event -> {
-				order = l.getText();
+				if (l.getText().equals("Имя"))
+					order = "name";
+				else if (l.getText().equals("Профессия"))
+					order = "profession";
+				else if (l.getText().equals("Общежитие")) {
+					property = "studentHouse";
+					value = "address";
+					order = null;
+				} else
+					order = l.getText();
 				primaryStage.hide();
 				startApp();
 
@@ -66,12 +77,12 @@ public class PersonalView {
 		for (Personal item : data) {
 			Label[] localLabels = { new Label(String.valueOf(item.getId())), new Label(item.getName()),
 					new Label(item.getProfession().getName()), new Label(item.getStudentHouse().getAddress()) };
-			Button edit = new Button("Edit");
+			Button edit = new Button("Изменить");
 			edit.setOnAction(event -> {
 
 				update(item.getId());
 			});
-			Button delete = new Button("Delete");
+			Button delete = new Button("Уволить");
 			delete.setOnAction(event -> {
 				delete(item.getId());
 			});
@@ -83,7 +94,7 @@ public class PersonalView {
 		}
 
 		Button create = new Button();
-		create.setText("Add personal");
+		create.setText("Добавить работника");
 		create.setOnAction(event -> {
 			create();
 		});
@@ -96,14 +107,14 @@ public class PersonalView {
 		root.getChildren().addAll(vbox);
 
 		Scene scene = new Scene(root);
-
-		primaryStage.setTitle("Personal");
+		scene.getStylesheets().add("view.css");
+		primaryStage.setTitle("Работники общежития");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
 
 	public void create() {
-		String[] attr = { "Enter personal's name", "Select profession", "Select student house" };
+		String[] attr = { "Введите имя работника", "Выберите профессию", "Выберите общежитие" };
 		Stage createStage = new Stage();
 		StackPane root = new StackPane();
 		Scene scene = new Scene(root);
@@ -133,8 +144,8 @@ public class PersonalView {
 				vbox.getChildren().add(comboBoxes[i - 1]);
 		}
 
-		Button savebtn = new Button("Save");
-		savebtn.setTooltip(new Tooltip("Save"));
+		Button savebtn = new Button("Сохранить");
+		savebtn.setTooltip(new Tooltip("Сохранить"));
 
 		savebtn.setOnAction(event -> {
 			String name = field.getText();
@@ -170,24 +181,27 @@ public class PersonalView {
 		vbox.setPadding(new Insets(10));
 		root.getChildren().add(vbox);
 
-		createStage.setTitle("New Resident");
+		createStage.setTitle("Добавление работника");
 		createStage.setScene(scene);
 		createStage.show();
 	}
 
 	public List<Personal> read() {
-		List<Personal> data = null;
-		data = (List<Personal>) Factory.getInstance().getPersonalDAO().getAllItems(order);
-
+		List<Personal> data;
+		if (order != null)
+			data = (List<Personal>) Factory.getInstance().getPersonalDAO().getAllItems(order);
+		else
+			data = (List<Personal>) Factory.getInstance().getPersonalDAO().getAllItems(property, value);
 		return data;
 	}
 
 	public void update(long l) {
-		String[] attr = { "New personal's name", "New personal's profession", "New personal's student house" };
+		String[] attr = { "Имя работника", "Профессия работника", "Общежитие" };
 
 		Stage updateStage = new Stage();
 		StackPane root = new StackPane();
 		Scene scene = new Scene(root);
+		scene.getStylesheets().add("view.css");
 		TextArea area = new TextArea();
 		Text[] text = new Text[attr.length];
 		for (int i = 0; i < text.length; i++) {
@@ -213,8 +227,8 @@ public class PersonalView {
 			vbox.getChildren().add(comboBoxes[i - 1]);
 		}
 
-		Button savebtn = new Button("Save");
-		savebtn.setTooltip(new Tooltip("Save"));
+		Button savebtn = new Button("Сохранить");
+		savebtn.setTooltip(new Tooltip("Сохранить"));
 
 		savebtn.setOnAction(event -> {
 			int[] id = new int[comboBoxes.length];
@@ -241,7 +255,7 @@ public class PersonalView {
 		vbox.setPadding(new Insets(10));
 		root.getChildren().add(vbox);
 
-		updateStage.setTitle("Edit Personal");
+		updateStage.setTitle("Изменение данных о работнике");
 		updateStage.setScene(scene);
 		updateStage.show();
 	}
@@ -250,9 +264,9 @@ public class PersonalView {
 		Personal item = mainDao.getItemById(l);
 
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Deleting " + item.getName());
-		alert.setHeaderText("Are you Sure, You want to delete " + item.getName());
-		alert.setContentText("This action can't be undone!");
+		alert.setTitle("Удаляем " + item.getName());
+		alert.setHeaderText("Вы уверены, что хотите удалить " + item.getName() + " ?");
+		alert.setContentText("Это действие не может быть отменено");
 		Optional result = alert.showAndWait();
 		if (result.get() == ButtonType.OK) {
 			primaryStage.hide();

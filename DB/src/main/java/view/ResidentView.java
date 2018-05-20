@@ -40,21 +40,56 @@ public class ResidentView {
 			Factory.getInstance().getFormOfEducationDAO(), Factory.getInstance().getFacultyDAO(),
 			Factory.getInstance().getRoomDAO() };
 	private String order = "id";
+	private String property = null;
+	private String value = null;
 
 	public void startApp() {
 		primaryStage = new Stage();
 		List<Resident> data = read();
-		Label[] labels = { new Label("id"), new Label("name"), new Label("sex"), new Label("phone"), new Label("age"),
-				new Label("residentType"), new Label("formOfEducation"), new Label("faculty"), new Label("Address"),
-				new Label("room"), new Label("balance") };
+
+		Label[] labels = { new Label("id"), new Label("Имя"), new Label("Пол"), new Label("Телефон"),
+				new Label("Возраст"), new Label("Тип проживающего"), new Label("Форма обучения"),
+				new Label("Факультет"), new Label("Адрес общежития"), new Label("Комната"), new Label("Счет") };
 		for (Label l : labels) {
-			if (!(l.getText().equals("Address") || l.getText().equals("residentType")
-					|| l.getText().equals("formOfEducation") || l.getText().equals("faculty")))
-				l.setOnMouseClicked(event -> {
+			l.setOnMouseClicked(event -> {
+				if (l.getText().equals("id"))
 					order = l.getText();
-					primaryStage.hide();
-					startApp();
-				});
+				else if (l.getText().equals("Имя"))
+					order = "name";
+				else if (l.getText().equals("Пол"))
+					order = "sex";
+				else if (l.getText().equals("Возраст"))
+					order = "age";
+				else if (l.getText().equals("Тип проживающего")) {
+					property = "residentType";
+					value = "residentType";
+					order = null;
+				}
+
+				else if (l.getText().equals("Форма обучения")) {
+					property = "formOfEducation";
+					value = "foe";
+					order = null;
+				} else if (l.getText().equals("Факультет")) {
+					property = "faculty";
+					value = "faculty";
+					order = null;
+				} else if (l.getText().equals("Адрес общежития")) {
+					property = "room.studentHouse";
+					value = "address";
+					order = null;
+				}
+
+				else if (l.getText().equals("Комната")) {
+					property = "room";
+					value = "roomNumber";
+					order = null;
+				} else if (l.getText().equals("Счет"))
+					order = "balance";
+
+				primaryStage.hide();
+				startApp();
+			});
 		}
 
 		GridPane gridPane = new GridPane();
@@ -78,11 +113,11 @@ public class ResidentView {
 					new Label(item.getFaculty().getName()), new Label(item.getRoom().getStudentHouse().getAddress()),
 					new Label(String.valueOf(item.getRoom().getRoomNumber())),
 					new Label(String.valueOf(item.getBalance())) };
-			Button edit = new Button("Edit");
+			Button edit = new Button("Изменить");
 			edit.setOnAction(event -> {
 				update(item.getId());
 			});
-			Button delete = new Button("Delete");
+			Button delete = new Button("Выселить");
 			delete.setOnAction(event -> {
 				delete(item.getId());
 			});
@@ -94,7 +129,7 @@ public class ResidentView {
 		}
 
 		Button create = new Button();
-		create.setText("Add resident");
+		create.setText("Поселить");
 		create.setOnAction(event -> {
 			create();
 		});
@@ -106,16 +141,15 @@ public class ResidentView {
 		StackPane root = new StackPane();
 		root.getChildren().addAll(vbox);
 		Scene scene = new Scene(root);
-
-		primaryStage.setTitle("Residents");
+		scene.getStylesheets().add("view.css");
+		primaryStage.setTitle("Проживающие");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
 
 	public void create() {
-		String[] attr = { "Enter resident's name", "Enter resident's age", "Enter resident's phone",
-				"Select resident's sex", "Select resident's type", "Select resident's form of education",
-				"Select resident's faculty", "Select resident's room" };
+		String[] attr = { "Введите имя проживающего", "Введите возраст", "Введите номер телефона", "Выберите пол",
+				"Выберите тип проживающего", "Выберите форму обучения", "Выберите факультет", "Выберите комнату" };
 
 		Text[] text = new Text[attr.length];
 		TextArea area = new TextArea();
@@ -177,8 +211,8 @@ public class ResidentView {
 		Scene scene = new Scene(root);
 		scene.getStylesheets().add("view.css");
 
-		Button savebtn = new Button("Save");
-		savebtn.setTooltip(new Tooltip("Save"));
+		Button savebtn = new Button("Сохранить");
+		savebtn.setTooltip(new Tooltip("Сохранить"));
 		savebtn.setOnAction(event -> {
 			String name = fields[0].getText();
 			String nameRegex = "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}|" + "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}|"
@@ -242,20 +276,23 @@ public class ResidentView {
 		vbox.setPadding(new Insets(10));
 		root.getChildren().add(vbox);
 
-		createStage.setTitle("New Resident");
+		createStage.setTitle("Добавление проживающего");
 		createStage.setScene(scene);
 		createStage.show();
 	}
 
 	public List<Resident> read() {
-		List<Resident> data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order);
+		List<Resident> data;
+		if (order != null)
+			data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order);
+		else
+			data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(property, value);
 		return data;
 	}
 
 	public void update(long l) {
-		String[] attr = { "New resident's name", "New resident's age", "New resident's phone", "New resident's sex",
-				"New resident's type", "New resident's form of education", "New resident's faculty",
-				"New resident's room" };
+		String[] attr = { "Имя проживающего", "Возраст", "Телефон", "Пол", "Тип проживающего", "Форма обучения",
+				"Факультет", "Комната" };
 		Resident item = mainDao.getItemById(l);
 		TextArea area = new TextArea();
 		Text[] text = new Text[8];
@@ -322,8 +359,8 @@ public class ResidentView {
 		Scene scene = new Scene(root);
 		scene.getStylesheets().add("view.css");
 
-		Button savebtn = new Button("Save");
-		savebtn.setTooltip(new Tooltip("Save"));
+		Button savebtn = new Button("Сохранить");
+		savebtn.setTooltip(new Tooltip("Сохранить"));
 		savebtn.setOnAction(event -> {
 			String name = fields[0].getText();
 			String nameRegex = "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}|" + "\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}[A-Za-zА-ЯА-я]+\\s{0,}|"
@@ -390,7 +427,7 @@ public class ResidentView {
 		vbox.setPadding(new Insets(10));
 		root.getChildren().add(vbox);
 
-		updateStage.setTitle("Edit Resident");
+		updateStage.setTitle("Изменение данных о проживающем");
 		updateStage.setScene(scene);
 		updateStage.show();
 	}
@@ -398,9 +435,9 @@ public class ResidentView {
 	public void delete(long l) {
 		Resident item = mainDao.getItemById(l);
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Deleting " + item.getName());
-		alert.setHeaderText("Are you Sure, You want to delete " + item.getName());
-		alert.setContentText("This action can't be undone!");
+		alert.setTitle("Удаление " + item.getName());
+		alert.setHeaderText("Вы уверены, что хотите удалить " + item.getName() + " ?");
+		alert.setContentText("Это действие нельзя будет отменить");
 		Optional result = alert.showAndWait();
 		if (result.get() == ButtonType.OK) {
 			primaryStage.hide();

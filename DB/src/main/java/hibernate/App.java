@@ -23,29 +23,29 @@ public class App extends javafx.application.Application {
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-		primaryStage.setTitle("Student House Database");
-		primaryStage.setMinWidth(600);
-		primaryStage.setMinHeight(600);
+		primaryStage.setTitle("База данных общежития");
+		primaryStage.setMinWidth(350);
+		primaryStage.setMinHeight(300);
 
 		primaryStage.setOnCloseRequest(e -> {
 			Platform.exit();
 			System.exit(0);
 		});
 		Button residents = new Button();
-		residents.setText("Residents");
+		residents.setText("Проживающие");
 		residents.setOnAction(event -> {
 			new ResidentView().startApp();
 		});
 		residents.setPrefSize(200, 50);
-		residents.setId("dark");
+
 		Button payments = new Button();
-		payments.setText("Payments");
+		payments.setText("Платежи");
 		payments.setOnAction(event -> {
 			new PaymentView().startApp();
 		});
 		payments.setPrefSize(200, 50);
 		Button personal = new Button();
-		personal.setText("Personal");
+		personal.setText("Персонал");
 		personal.setOnAction(event -> {
 			new PersonalView().startApp();
 		});

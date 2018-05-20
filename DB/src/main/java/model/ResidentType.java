@@ -9,7 +9,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "resident_types")
-public class ResidentType implements Option {
+public class ResidentType implements Option, Comparable<ResidentType> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	@Column(name = "resident_type_id")
@@ -46,5 +46,10 @@ public class ResidentType implements Option {
 
 	public void setName(String resident_type) {
 		this.residentType = resident_type;
+	}
+
+	@Override
+	public int compareTo(ResidentType o) {
+		return this.getName().compareTo(o.getName());
 	}
 }

@@ -18,4 +18,6 @@ public interface IDao<T> {
 	public <T extends Option> String[] items();
 
 	public Collection<T> getAllItems(String order);
+
+	public Collection<T> getAllItems(String property, String value);
 }

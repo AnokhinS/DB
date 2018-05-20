@@ -27,11 +27,13 @@ public class DaoImpls<T> implements IDao<T> {
 		return res;
 	}
 
-	public Collection<T> getAllItems(String s) {
+	public Collection<T> getAllItems(String property, String value) {
 		List<T> items = new ArrayList<T>();
 		Session session = HibernateUtil.getSessionFactory().openSession();
-		items = session.createCriteria(classType).addOrder(Order.asc(s))
-				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+		Criteria c = session.createCriteria(classType);
+		c.createAlias(property, "p");
+		c.addOrder(Order.asc("p." + value)).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+		items = c.list();
 		session.close();
 		return items;
 	}
@@ -71,5 +73,15 @@ public class DaoImpls<T> implements IDao<T> {
 		session.delete(item);
 		session.getTransaction().commit();
 		session.close();
+	}
+
+	@Override
+	public Collection<T> getAllItems(String order) {
+		List<T> items = new ArrayList<T>();
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		items = session.createCriteria(classType).addOrder(Order.asc(order))
+				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+		session.close();
+		return items;
 	}
 }

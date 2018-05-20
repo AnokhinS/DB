@@ -41,7 +41,22 @@ public class PaymentView {
 
 		List<Payment> data = read(order);
 
-		Label[] labels = { new Label("id"), new Label("resident"), new Label("sum"), new Label("date") };
+		Label[] labels = { new Label("id"), new Label("Проживающий"), new Label("Сумма"), new Label("Дата") };
+		for (Label l : labels) {
+			l.setOnMouseClicked(event -> {
+				if (l.getText().equals("Проживающий")) {
+					order = "resident";
+				} else if (l.getText().equals("Сумма"))
+					order = "sum";
+				else if (l.getText().equals("Дата")) {
+					order = "date";
+				} else
+					order = l.getText();
+				primaryStage.hide();
+				startApp();
+
+			});
+		}
 
 		GridPane gridPane = new GridPane();
 		gridPane.setHgap(30);
@@ -61,7 +76,7 @@ public class PaymentView {
 			Label[] localLabels = { new Label(String.valueOf(item.getId())), new Label(item.getResident().getName()),
 					new Label(String.valueOf(item.getSum())), new Label(String.valueOf(item.getDate())) };
 
-			Button delete = new Button("Delete");
+			Button delete = new Button("Удалить платеж");
 			delete.setOnAction(event -> {
 				delete(item.getId());
 			});
@@ -72,7 +87,7 @@ public class PaymentView {
 		}
 
 		Button create = new Button();
-		create.setText("Add payment");
+		create.setText("Добавить платеж");
 		create.setOnAction(event -> {
 			create();
 		});
@@ -85,14 +100,14 @@ public class PaymentView {
 		root.getChildren().addAll(vbox);
 
 		Scene scene = new Scene(root);
-
-		primaryStage.setTitle("Payments");
+		scene.getStylesheets().add("view.css");
+		primaryStage.setTitle("Платежи");
 		primaryStage.setScene(scene);
 		primaryStage.show();
 	}
 
 	public void create() {
-		String[] attr = { "Select resident", "Enter sum", "Select date" };
+		String[] attr = { "Выберите проживающего", "Введите сумму платежа", "Введите дату" };
 		Text[] text = new Text[attr.length];
 		for (int i = 0; i < text.length; i++) {
 			text[i] = new Text(attr[i]);
@@ -119,8 +134,8 @@ public class PaymentView {
 		StackPane root = new StackPane();
 		Scene scene = new Scene(root);
 		scene.getStylesheets().add("view.css");
-		Button savebtn = new Button("Save");
-		savebtn.setTooltip(new Tooltip("Save"));
+		Button savebtn = new Button("Сохранить");
+		savebtn.setTooltip(new Tooltip("Сохранить"));
 
 		savebtn.setOnAction(event -> {
 			String s = (String) comboBox.getValue();
@@ -177,7 +192,7 @@ public class PaymentView {
 		vbox.setPadding(new Insets(10));
 		root.getChildren().add(vbox);
 
-		createStage.setTitle("New Resident");
+		createStage.setTitle("Добавление платежа");
 		createStage.setScene(scene);
 		createStage.show();
 	}
@@ -190,9 +205,9 @@ public class PaymentView {
 
 	public void delete(long l) {
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
-		alert.setTitle("Deleting...");
-		alert.setHeaderText("Are you Sure?");
-		alert.setContentText("This action can't be undone!");
+		alert.setTitle("Удаляем платеж");
+		alert.setHeaderText("Вы уверены?");
+		alert.setContentText("Это действие не может быть отменено");
 		Optional result = alert.showAndWait();
 
 		if (result.get() == ButtonType.OK) {
