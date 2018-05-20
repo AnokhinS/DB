@@ -10,12 +10,14 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.Pagination;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -26,6 +28,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import model.Faculty;
 import model.FormOfEducation;
 import model.Resident;
@@ -34,7 +37,7 @@ import model.Room;
 
 public class ResidentView {
 
-	private Stage primaryStage;
+	private Stage primaryStage = new Stage();
 	private IDao<Resident> mainDao = Factory.getInstance().getResidentDAO();
 	private IDao[] utilDao = { Factory.getInstance().getResidentTypeDAO(),
 			Factory.getInstance().getFormOfEducationDAO(), Factory.getInstance().getFacultyDAO(),
@@ -42,14 +45,17 @@ public class ResidentView {
 	private String order = "id";
 	private String property = null;
 	private String value = null;
+	Label[] labels = { new Label("id"), new Label("Имя"), new Label("Пол"), new Label("Телефон"), new Label("Возраст"),
+			new Label("Тип проживающего"), new Label("Форма обучения"), new Label("Факультет"),
+			new Label("Адрес общежития"), new Label("Комната"), new Label("Счет") };
+	List<Resident> data = read();
+
+	public int itemsPerPage() {
+		return 5;
+	}
 
 	public void startApp() {
-		primaryStage = new Stage();
-		List<Resident> data = read();
-
-		Label[] labels = { new Label("id"), new Label("Имя"), new Label("Пол"), new Label("Телефон"),
-				new Label("Возраст"), new Label("Тип проживающего"), new Label("Форма обучения"),
-				new Label("Факультет"), new Label("Адрес общежития"), new Label("Комната"), new Label("Счет") };
+		data = read();
 		for (Label l : labels) {
 			l.setOnMouseClicked(event -> {
 				if (l.getText().equals("id"))
@@ -64,9 +70,7 @@ public class ResidentView {
 					property = "residentType";
 					value = "residentType";
 					order = null;
-				}
-
-				else if (l.getText().equals("Форма обучения")) {
+				} else if (l.getText().equals("Форма обучения")) {
 					property = "formOfEducation";
 					value = "foe";
 					order = null;
@@ -92,21 +96,55 @@ public class ResidentView {
 			});
 		}
 
+		int count = (data.size() / itemsPerPage() == 0) ? data.size() / itemsPerPage()
+				: data.size() / itemsPerPage() + 1;
+		Pagination pagination = new Pagination(count, 0);
+		pagination.setPageFactory(new Callback<Integer, Node>() {
+			@Override
+			public Node call(Integer pageIndex) {
+				return createPage(pageIndex);
+			}
+		});
+
+		Button create = new Button();
+		create.setText("Поселить");
+		create.setOnAction(event -> {
+			create();
+		});
+
+		VBox vbox = new VBox(10);
+		vbox.setPadding(new Insets(20));
+		vbox.getChildren().addAll(create, pagination);
+		StackPane root = new StackPane();
+		root.getChildren().addAll(vbox);
+		Scene scene = new Scene(root);
+		scene.getStylesheets().add("view.css");
+		primaryStage.setTitle("Проживающие");
+		primaryStage.setScene(scene);
+		primaryStage.show();
+	}
+
+	public VBox createPage(int pageIndex) {
+
+		VBox box = new VBox(10);
+		int page = pageIndex * itemsPerPage();
 		GridPane gridPane = new GridPane();
 		gridPane.setHgap(30);
 		gridPane.setVgap(10);
-		for (int i = 0; i < labels.length; i++) {
-			labels[i].setFont(new Font("Arial", 15));
-			gridPane.add(labels[i], i, 0);
+		for (int j = 0; j < labels.length; j++) {
+			labels[j].setFont(new Font("Arial", 15));
+			gridPane.add(labels[j], j, 0);
 		}
-
 		Separator separator = new Separator();
 		separator.setOrientation(Orientation.HORIZONTAL);
-
 		gridPane.add(separator, 0, 1, 14, 1);
-
-		int i = 2;
-		for (Resident item : data) {
+		int k = 2;
+		for (int i = page; i < page + itemsPerPage(); i++) {
+			Resident item;
+			if (i != data.size())
+				item = data.get(i);
+			else
+				break;
 			Label[] localLabels = { new Label(String.valueOf(item.getId())), new Label(item.getName()),
 					new Label(item.getSex()), new Label(item.getPhone()), new Label(String.valueOf(item.getAge())),
 					new Label(item.getResType().getName()), new Label(item.getFoe().getName()),
@@ -122,29 +160,15 @@ public class ResidentView {
 				delete(item.getId());
 			});
 			for (int j = 0; j < localLabels.length; j++)
-				gridPane.add(localLabels[j], j, i, 1, 1);
-			gridPane.add(edit, localLabels.length + 1, i, 1, 1);
-			gridPane.add(delete, localLabels.length + 2, i, 1, 1);
-			i++;
+				gridPane.add(localLabels[j], j, k, 1, 1);
+			gridPane.add(edit, localLabels.length + 1, k, 1, 1);
+			gridPane.add(delete, localLabels.length + 2, k, 1, 1);
+			k++;
 		}
+		box.setPadding(new Insets(20));
+		box.getChildren().addAll(gridPane);
 
-		Button create = new Button();
-		create.setText("Поселить");
-		create.setOnAction(event -> {
-			create();
-		});
-
-		VBox vbox = new VBox(10);
-		vbox.setPadding(new Insets(20));
-		vbox.getChildren().addAll(create, gridPane);
-
-		StackPane root = new StackPane();
-		root.getChildren().addAll(vbox);
-		Scene scene = new Scene(root);
-		scene.getStylesheets().add("view.css");
-		primaryStage.setTitle("Проживающие");
-		primaryStage.setScene(scene);
-		primaryStage.show();
+		return box;
 	}
 
 	public void create() {
