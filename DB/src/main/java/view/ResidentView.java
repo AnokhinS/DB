@@ -96,7 +96,7 @@ public class ResidentView {
 			});
 		}
 
-		int count = (data.size() / itemsPerPage() == 0) ? data.size() / itemsPerPage()
+		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
 				: data.size() / itemsPerPage() + 1;
 		Pagination pagination = new Pagination(count, 0);
 		pagination.setPageFactory(new Callback<Integer, Node>() {
@@ -134,6 +134,7 @@ public class ResidentView {
 		for (int j = 0; j < labels.length; j++) {
 			labels[j].setFont(new Font("Arial", 15));
 			gridPane.add(labels[j], j, 0);
+
 		}
 		Separator separator = new Separator();
 		separator.setOrientation(Orientation.HORIZONTAL);

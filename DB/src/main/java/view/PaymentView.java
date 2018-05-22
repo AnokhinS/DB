@@ -9,6 +9,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -16,6 +17,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.Pagination;
 import javafx.scene.control.Separator;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
@@ -26,6 +28,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import model.Payment;
 import model.Resident;
 
@@ -35,13 +38,12 @@ public class PaymentView {
 	private IDao<Payment> mainDao = Factory.getInstance().getPaymentDAO();
 	private IDao utilDao = Factory.getInstance().getResidentDAO();
 	private String order = "id";
+	List<Payment> data = read(order);
+	Label[] labels = { new Label("id"), new Label("Проживающий"), new Label("Сумма"), new Label("Дата") };
 
 	public void startApp() {
+		data = read(order);
 		primaryStage = new Stage();
-
-		List<Payment> data = read(order);
-
-		Label[] labels = { new Label("id"), new Label("Проживающий"), new Label("Сумма"), new Label("Дата") };
 		for (Label l : labels) {
 			l.setOnMouseClicked(event -> {
 				if (l.getText().equals("Проживающий")) {
@@ -57,34 +59,16 @@ public class PaymentView {
 
 			});
 		}
+		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
+				: data.size() / itemsPerPage() + 1;
 
-		GridPane gridPane = new GridPane();
-		gridPane.setHgap(30);
-		gridPane.setVgap(10);
-		for (int i = 0; i < labels.length; i++) {
-			labels[i].setFont(new Font("Arial", 15));
-			gridPane.add(labels[i], i, 0);
-		}
-
-		Separator separator = new Separator();
-		separator.setOrientation(Orientation.HORIZONTAL);
-
-		gridPane.add(separator, 0, 1, 7, 1);
-
-		int i = 2;
-		for (Payment item : data) {
-			Label[] localLabels = { new Label(String.valueOf(item.getId())), new Label(item.getResident().getName()),
-					new Label(String.valueOf(item.getSum())), new Label(String.valueOf(item.getDate())) };
-
-			Button delete = new Button("Удалить платеж");
-			delete.setOnAction(event -> {
-				delete(item.getId());
-			});
-			for (int j = 0; j < localLabels.length; j++)
-				gridPane.add(localLabels[j], j, i, 1, 1);
-			gridPane.add(delete, localLabels.length + 1, i, 1, 1);
-			i++;
-		}
+		Pagination pagination = new Pagination(count, 0);
+		pagination.setPageFactory(new Callback<Integer, Node>() {
+			@Override
+			public Node call(Integer pageIndex) {
+				return createPage(pageIndex);
+			}
+		});
 
 		Button create = new Button();
 		create.setText("Добавить платеж");
@@ -94,7 +78,7 @@ public class PaymentView {
 
 		VBox vbox = new VBox(10);
 		vbox.setPadding(new Insets(20));
-		vbox.getChildren().addAll(create, gridPane);
+		vbox.getChildren().addAll(create, pagination);
 
 		StackPane root = new StackPane();
 		root.getChildren().addAll(vbox);
@@ -104,6 +88,48 @@ public class PaymentView {
 		primaryStage.setTitle("Платежи");
 		primaryStage.setScene(scene);
 		primaryStage.show();
+	}
+
+	public int itemsPerPage() {
+		return 5;
+	}
+
+	public VBox createPage(int pageIndex) {
+
+		VBox box = new VBox(10);
+		int page = pageIndex * itemsPerPage();
+		GridPane gridPane = new GridPane();
+		gridPane.setHgap(30);
+		gridPane.setVgap(10);
+		for (int j = 0; j < labels.length; j++) {
+			labels[j].setFont(new Font("Arial", 15));
+			gridPane.add(labels[j], j, 0);
+		}
+		Separator separator = new Separator();
+		separator.setOrientation(Orientation.HORIZONTAL);
+		gridPane.add(separator, 0, 1, 7, 1);
+		int k = 2;
+		for (int i = page; i < page + itemsPerPage(); i++) {
+			Payment item;
+			if (i != data.size())
+				item = data.get(i);
+			else
+				break;
+			Label[] localLabels = { new Label(String.valueOf(item.getId())), new Label(item.getResident().getName()),
+					new Label(String.valueOf(item.getSum())), new Label(String.valueOf(item.getDate())) };
+			Button delete = new Button("Удалить");
+			delete.setOnAction(event -> {
+				delete(item.getId());
+			});
+			for (int j = 0; j < localLabels.length; j++)
+				gridPane.add(localLabels[j], j, k, 1, 1);
+			gridPane.add(delete, localLabels.length + 1, k, 1, 1);
+			k++;
+		}
+		box.setPadding(new Insets(20));
+		box.getChildren().addAll(gridPane);
+
+		return box;
 	}
 
 	public void create() {
