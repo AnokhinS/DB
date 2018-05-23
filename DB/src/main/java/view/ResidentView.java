@@ -49,13 +49,9 @@ public class ResidentView {
 			new Label("Тип проживающего"), new Label("Форма обучения"), new Label("Факультет"),
 			new Label("Адрес общежития"), new Label("Комната"), new Label("Счет") };
 	List<Resident> data = read();
-
-	public int itemsPerPage() {
-		return 5;
-	}
+	VBox vbox = getTable();
 
 	public void startApp() {
-		data = read();
 		for (Label l : labels) {
 			l.setOnMouseClicked(event -> {
 				if (l.getText().equals("id"))
@@ -91,13 +87,33 @@ public class ResidentView {
 				} else if (l.getText().equals("Счет"))
 					order = "balance";
 
-				primaryStage.hide();
-				startApp();
+				data = read();
+				vbox = getTable();
+				StackPane root = new StackPane();
+				root.getChildren().addAll(vbox);
+				Scene scene = new Scene(root);
+				scene.getStylesheets().add("view.css");
+				primaryStage.setScene(scene);
 			});
 		}
 
+		StackPane root = new StackPane();
+		root.getChildren().addAll(vbox);
+		Scene scene = new Scene(root);
+		scene.getStylesheets().add("view.css");
+		primaryStage.setTitle("Проживающие");
+		primaryStage.setScene(scene);
+		primaryStage.show();
+	}
+
+	public int itemsPerPage() {
+		return 5;
+	}
+
+	public VBox getTable() {
 		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
 				: data.size() / itemsPerPage() + 1;
+
 		Pagination pagination = new Pagination(count, 0);
 		pagination.setPageFactory(new Callback<Integer, Node>() {
 			@Override
@@ -115,13 +131,7 @@ public class ResidentView {
 		VBox vbox = new VBox(10);
 		vbox.setPadding(new Insets(20));
 		vbox.getChildren().addAll(create, pagination);
-		StackPane root = new StackPane();
-		root.getChildren().addAll(vbox);
-		Scene scene = new Scene(root);
-		scene.getStylesheets().add("view.css");
-		primaryStage.setTitle("Проживающие");
-		primaryStage.setScene(scene);
-		primaryStage.show();
+		return vbox;
 	}
 
 	public VBox createPage(int pageIndex) {
@@ -308,10 +318,7 @@ public class ResidentView {
 
 	public List<Resident> read() {
 		List<Resident> data;
-		if (order != null)
-			data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order);
-		else
-			data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(property, value);
+		data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order, property, value, null);
 		return data;
 	}
 
@@ -463,12 +470,14 @@ public class ResidentView {
 		alert.setTitle("Удаление " + item.getName());
 		alert.setHeaderText("Вы уверены, что хотите удалить " + item.getName() + " ?");
 		alert.setContentText("Это действие нельзя будет отменить");
-		Optional result = alert.showAndWait();
-		if (result.get() == ButtonType.OK) {
-			primaryStage.hide();
-			mainDao.deleteItem(item);
-			startApp();
+		try {
+			Optional result = alert.showAndWait();
+			if (result.get() == ButtonType.OK) {
+				primaryStage.hide();
+				mainDao.deleteItem(item);
+				startApp();
+			}
+		} catch (Exception e) {
 		}
 	}
-
 }

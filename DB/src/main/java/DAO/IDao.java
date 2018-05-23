@@ -1,7 +1,9 @@
 package DAO;
 
 import java.util.Collection;
+import java.util.List;
 
+import org.hibernate.criterion.Criterion;
 import org.postgresql.util.PSQLException;
 
 import model.Option;
@@ -17,7 +19,5 @@ public interface IDao<T> {
 
 	public <T extends Option> String[] items();
 
-	public Collection<T> getAllItems(String order);
-
-	public Collection<T> getAllItems(String property, String value);
+	public Collection<T> getAllItems(String order, String property, String value, List<Criterion> c);
 }

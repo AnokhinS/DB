@@ -8,6 +8,7 @@ import javafx.scene.control.Button;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import view.DebtorView;
 import view.PaymentView;
 import view.PersonalView;
 import view.ResidentView;
@@ -50,11 +51,18 @@ public class App extends javafx.application.Application {
 			new PersonalView().startApp();
 		});
 		personal.setPrefSize(200, 50);
+
+		Button debt = new Button();
+		debt.setText("Должники");
+		debt.setOnAction(event -> {
+			new DebtorView().startApp();
+		});
+		debt.setPrefSize(200, 50);
 		GridPane root = new GridPane();
 		root.setAlignment(Pos.CENTER);
 		VBox vbox = new VBox(50);
 		vbox.setPadding(new Insets(20));
-		vbox.getChildren().addAll(residents, payments, personal);
+		vbox.getChildren().addAll(residents, payments, personal, debt);
 		root.getChildren().add(vbox);
 		Scene scene = new Scene(root);
 		scene.getStylesheets().add("view.css");

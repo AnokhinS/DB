@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
+import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
 import org.postgresql.util.PSQLException;
 
@@ -19,23 +20,14 @@ public class DaoImpls<T> implements IDao<T> {
 		classType = type;
 	}
 
+	@SuppressWarnings("hiding")
 	public <T extends Option> String[] items() {
-		List<T> items = (List<T>) getAllItems("id");
+		@SuppressWarnings("unchecked")
+		List<T> items = (List<T>) getAllItems("id", null, null, null);
 		String[] res = new String[items.size()];
 		for (int i = 0; i < res.length; i++)
 			res[i] = items.get(i).getId() + "-" + items.get(i).getName();
 		return res;
-	}
-
-	public Collection<T> getAllItems(String property, String value) {
-		List<T> items = new ArrayList<T>();
-		Session session = HibernateUtil.getSessionFactory().openSession();
-		Criteria c = session.createCriteria(classType);
-		c.createAlias(property, "p");
-		c.addOrder(Order.asc("p." + value)).setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
-		items = c.list();
-		session.close();
-		return items;
 	}
 
 	public void addItem(T item) throws PSQLException {
@@ -62,6 +54,7 @@ public class DaoImpls<T> implements IDao<T> {
 
 	public T getItemById(Long id) {
 		Session session = HibernateUtil.getSessionFactory().openSession();
+		@SuppressWarnings("unchecked")
 		T item = (T) session.get(classType, id);
 		session.close();
 		return item;
@@ -75,13 +68,25 @@ public class DaoImpls<T> implements IDao<T> {
 		session.close();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Collection<T> getAllItems(String order) {
+	public Collection<T> getAllItems(String order, String property, String value, List<Criterion> crits) {
 		List<T> items = new ArrayList<T>();
 		Session session = HibernateUtil.getSessionFactory().openSession();
-		items = session.createCriteria(classType).addOrder(Order.asc(order))
-				.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
+		@SuppressWarnings("deprecation")
+		Criteria result = session.createCriteria(classType);
+		if (order != null) {
+			result.addOrder(Order.asc(order));
+		} else if (property != null && value != null) {
+			result.createAlias(property, "p").addOrder(Order.asc("p." + value));
+		}
+		if (crits != null)
+			for (Criterion c : crits) {
+				result.add(c);
+			}
+		items = result.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
 		session.close();
 		return items;
 	}
+
 }

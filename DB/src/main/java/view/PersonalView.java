@@ -40,10 +40,9 @@ public class PersonalView {
 	private String value = null;
 	List<Personal> data = read();
 	Label[] labels = { new Label("id"), new Label("Имя"), new Label("Профессия"), new Label("Общежитие") };
+	VBox vbox = getTable();
 
 	public void startApp() {
-		primaryStage = new Stage();
-		data = read();
 		for (Label l : labels) {
 			l.setOnMouseClicked(event -> {
 				if (l.getText().equals("Имя"))
@@ -56,12 +55,31 @@ public class PersonalView {
 					order = null;
 				} else
 					order = l.getText();
-				primaryStage.hide();
-				startApp();
-
+				data = read();
+				vbox = getTable();
+				StackPane root = new StackPane();
+				root.getChildren().addAll(vbox);
+				Scene scene = new Scene(root);
+				scene.getStylesheets().add("view.css");
+				primaryStage.setScene(scene);
 			});
 		}
 
+		primaryStage = new Stage();
+		StackPane root = new StackPane();
+		root.getChildren().addAll(vbox);
+		Scene scene = new Scene(root);
+		scene.getStylesheets().add("view.css");
+		primaryStage.setTitle("Работники общежития");
+		primaryStage.setScene(scene);
+		primaryStage.show();
+	}
+
+	public int itemsPerPage() {
+		return 5;
+	}
+
+	public VBox getTable() {
 		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
 				: data.size() / itemsPerPage() + 1;
 
@@ -82,19 +100,7 @@ public class PersonalView {
 		VBox vbox = new VBox(10);
 		vbox.setPadding(new Insets(20));
 		vbox.getChildren().addAll(create, pagination);
-
-		StackPane root = new StackPane();
-		root.getChildren().addAll(vbox);
-
-		Scene scene = new Scene(root);
-		scene.getStylesheets().add("view.css");
-		primaryStage.setTitle("Работники общежития");
-		primaryStage.setScene(scene);
-		primaryStage.show();
-	}
-
-	public int itemsPerPage() {
-		return 5;
+		return vbox;
 	}
 
 	public VBox createPage(int pageIndex) {
@@ -215,10 +221,7 @@ public class PersonalView {
 
 	public List<Personal> read() {
 		List<Personal> data;
-		if (order != null)
-			data = (List<Personal>) Factory.getInstance().getPersonalDAO().getAllItems(order);
-		else
-			data = (List<Personal>) Factory.getInstance().getPersonalDAO().getAllItems(property, value);
+		data = (List<Personal>) Factory.getInstance().getPersonalDAO().getAllItems(order, property, value, null);
 		return data;
 	}
 
@@ -294,11 +297,14 @@ public class PersonalView {
 		alert.setTitle("Удаляем " + item.getName());
 		alert.setHeaderText("Вы уверены, что хотите удалить " + item.getName() + " ?");
 		alert.setContentText("Это действие не может быть отменено");
-		Optional result = alert.showAndWait();
-		if (result.get() == ButtonType.OK) {
-			primaryStage.hide();
-			mainDao.deleteItem(item);
-			startApp();
+		try {
+			Optional result = alert.showAndWait();
+			if (result.get() == ButtonType.OK) {
+				primaryStage.hide();
+				mainDao.deleteItem(item);
+				startApp();
+			}
+		} catch (Exception e) {
 		}
 	}
 

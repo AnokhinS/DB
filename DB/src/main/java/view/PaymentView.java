@@ -38,12 +38,11 @@ public class PaymentView {
 	private IDao<Payment> mainDao = Factory.getInstance().getPaymentDAO();
 	private IDao utilDao = Factory.getInstance().getResidentDAO();
 	private String order = "id";
-	List<Payment> data = read(order);
+	List<Payment> data = read();
+	VBox vbox = getTable();
 	Label[] labels = { new Label("id"), new Label("Проживающий"), new Label("Сумма"), new Label("Дата") };
 
 	public void startApp() {
-		data = read(order);
-		primaryStage = new Stage();
 		for (Label l : labels) {
 			l.setOnMouseClicked(event -> {
 				if (l.getText().equals("Проживающий")) {
@@ -54,11 +53,28 @@ public class PaymentView {
 					order = "date";
 				} else
 					order = l.getText();
-				primaryStage.hide();
-				startApp();
-
+				data = read();
+				vbox = getTable();
+				StackPane root = new StackPane();
+				root.getChildren().addAll(vbox);
+				Scene scene = new Scene(root);
+				scene.getStylesheets().add("view.css");
+				primaryStage.setScene(scene);
 			});
 		}
+
+		primaryStage = new Stage();
+		StackPane root = new StackPane();
+		root.getChildren().addAll(vbox);
+		Scene scene = new Scene(root);
+		scene.getStylesheets().add("view.css");
+		primaryStage.setScene(scene);
+		primaryStage.setTitle("Платежи");
+		primaryStage.setScene(scene);
+		primaryStage.show();
+	}
+
+	public VBox getTable() {
 		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
 				: data.size() / itemsPerPage() + 1;
 
@@ -79,15 +95,7 @@ public class PaymentView {
 		VBox vbox = new VBox(10);
 		vbox.setPadding(new Insets(20));
 		vbox.getChildren().addAll(create, pagination);
-
-		StackPane root = new StackPane();
-		root.getChildren().addAll(vbox);
-
-		Scene scene = new Scene(root);
-		scene.getStylesheets().add("view.css");
-		primaryStage.setTitle("Платежи");
-		primaryStage.setScene(scene);
-		primaryStage.show();
+		return vbox;
 	}
 
 	public int itemsPerPage() {
@@ -223,24 +231,26 @@ public class PaymentView {
 		createStage.show();
 	}
 
-	public List<Payment> read(String s) {
+	public List<Payment> read() {
 		List<Payment> data = null;
-		data = (List<Payment>) Factory.getInstance().getPaymentDAO().getAllItems(s);
+		data = (List<Payment>) Factory.getInstance().getPaymentDAO().getAllItems(order, null, null, null);
 		return data;
 	}
 
 	public void delete(long l) {
+		Payment item = mainDao.getItemById(l);
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle("Удаляем платеж");
 		alert.setHeaderText("Вы уверены?");
 		alert.setContentText("Это действие не может быть отменено");
-		Optional result = alert.showAndWait();
-
-		if (result.get() == ButtonType.OK) {
-			primaryStage.hide();
-			Payment item = mainDao.getItemById(l);
-			mainDao.deleteItem(item);
-			startApp();
+		try {
+			Optional result = alert.showAndWait();
+			if (result.get() == ButtonType.OK) {
+				primaryStage.hide();
+				mainDao.deleteItem(item);
+				startApp();
+			}
+		} catch (Exception e) {
 		}
 	}
 
