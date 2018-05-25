@@ -1,6 +1,5 @@
 package view;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,7 +23,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -37,71 +35,23 @@ import model.Resident;
 import model.ResidentType;
 import model.Room;
 
-public class ResidentView2 {
+public class ResidentView {
 
 	private Stage primaryStage = new Stage();
 	private IDao<Resident> mainDao = Factory.getInstance().getResidentDAO();
 	private IDao[] utilDao = { Factory.getInstance().getResidentTypeDAO(),
 			Factory.getInstance().getFormOfEducationDAO(), Factory.getInstance().getFacultyDAO(),
 			Factory.getInstance().getRoomDAO() };
-	private Label[] labels = { new Label("id"), new Label("Имя"), new Label("Пол"), new Label("Телефон"),
-			new Label("Возраст"), new Label("Тип проживающего"), new Label("Форма обучения"), new Label("Факультет"),
-			new Label("Адрес общежития"), new Label("Комната"), new Label("Счет") };
 	private String order = "id";
 	private String property = null;
 	private String value = null;
-	private ComboBox[] comboBoxes = comboInit();
-	private HashMap<String, Object> critMap = new HashMap<>();
-	private List<Resident> data;
-	private VBox vbox;
+	Label[] labels = { new Label("id"), new Label("Имя"), new Label("Пол"), new Label("Телефон"), new Label("Возраст"),
+			new Label("Тип проживающего"), new Label("Форма обучения"), new Label("Факультет"),
+			new Label("Адрес общежития"), new Label("Комната"), new Label("Счет") };
+	List<Resident> data = read();
+	VBox vbox = getTable();
 
-	ComboBox<String>[] comboInit() {
-		String[] options = { "М", "Ж" };
-		String[] labels = { "Пол", "Тип", "Форма обучения", "Факультет", "Комната" };
-		ComboBox<String>[] comboBoxes = new ComboBox[5];
-		for (int i = 0; i < comboBoxes.length; i++) {
-			comboBoxes[i] = new ComboBox<>();
-			comboBoxes[i].setPromptText(labels[i]);
-			if (i > 0) {
-				comboBoxes[i].getItems().addAll(utilDao[i - 1].items());
-			}
-		}
-		comboBoxes[0].getItems().addAll(options);
-		comboBoxes[0].setOnAction(e -> {
-			String tmp = (String) comboBoxes[0].getSelectionModel().getSelectedItem();
-			critMap.put("sex", tmp);
-			primaryStage.setScene(getScene());
-			comboBoxes[0].setPromptText(tmp);
-		});
-		comboBoxes[1].setOnAction(e -> {
-			String tmp = (String) comboBoxes[1].getSelectionModel().getSelectedItem();
-			critMap.put("residentType", new ResidentType(Long.valueOf(tmp.split("-")[0])));
-			primaryStage.setScene(getScene());
-			comboBoxes[1].setPromptText(tmp);
-		});
-		comboBoxes[2].setOnAction(e -> {
-			String tmp = (String) comboBoxes[2].getSelectionModel().getSelectedItem();
-			critMap.put("formOfEducation", new FormOfEducation(Long.valueOf(tmp.split("-")[0])));
-			primaryStage.setScene(getScene());
-			comboBoxes[2].setPromptText(tmp);
-		});
-		comboBoxes[3].setOnAction(e -> {
-			String tmp = (String) comboBoxes[3].getSelectionModel().getSelectedItem();
-			critMap.put("faculty", new Faculty(Long.valueOf(tmp.split("-")[0])));
-			primaryStage.setScene(getScene());
-			comboBoxes[3].setPromptText(tmp);
-		});
-		comboBoxes[4].setOnAction(e -> {
-			String tmp = (String) comboBoxes[4].getSelectionModel().getSelectedItem();
-			critMap.put("room", new Room(Long.valueOf(tmp.split("-")[0])));
-			primaryStage.setScene(getScene());
-			comboBoxes[4].setPromptText(tmp);
-		});
-
-		return comboBoxes;
-	}
-
-	void labelInit() {
+	public void startApp() {
 		for (Label l : labels) {
 			l.setOnMouseClicked(event -> {
 				if (l.getText().equals("id"))
@@ -138,43 +88,22 @@ public class ResidentView2 {
 					order = "balance";
 
 				data = read();
-				primaryStage.setScene(getScene());
+				vbox = getTable();
+				StackPane root = new StackPane();
+				root.getChildren().addAll(vbox);
+				Scene scene = new Scene(root);
+				scene.getStylesheets().add("view.css");
+				primaryStage.setScene(scene);
 			});
 		}
-	}
 
-	@SuppressWarnings("unchecked")
-	public void startApp() {
-		labelInit();
-		primaryStage.setTitle("Проживающие");
-		primaryStage.setScene(getScene());
-		primaryStage.show();
-	}
-
-	Scene getScene() {
 		StackPane root = new StackPane();
-		data = read();
-		Button button = new Button("Сброс");
-		button.setOnAction(e -> {
-			order = "id";
-			property = null;
-			value = null;
-			critMap = new HashMap();
-			primaryStage.setScene(getScene());
-		});
-		HBox hbox = new HBox(10);
-		hbox.setPadding(new Insets(20));
-		for (ComboBox c : comboBoxes)
-			hbox.getChildren().add(c);
-		hbox.getChildren().add(button);
-		vbox = getTable();
-		VBox mainBox = new VBox(10);
-		mainBox.setPadding(new Insets(20));
-		mainBox.getChildren().addAll(hbox, vbox);
-		root.getChildren().addAll(mainBox);
+		root.getChildren().addAll(vbox);
 		Scene scene = new Scene(root);
 		scene.getStylesheets().add("view.css");
-		return scene;
+		primaryStage.setTitle("Проживающие");
+		primaryStage.setScene(scene);
+		primaryStage.show();
 	}
 
 	public int itemsPerPage() {
@@ -184,7 +113,7 @@ public class ResidentView2 {
 	public VBox getTable() {
 		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
 				: data.size() / itemsPerPage() + 1;
-		System.out.println(data.size());
+
 		Pagination pagination = new Pagination(count, 0);
 		pagination.setPageFactory(new Callback<Integer, Node>() {
 			@Override
@@ -206,6 +135,7 @@ public class ResidentView2 {
 	}
 
 	public VBox createPage(int pageIndex) {
+
 		VBox box = new VBox(10);
 		int page = pageIndex * itemsPerPage();
 		GridPane gridPane = new GridPane();
@@ -388,7 +318,7 @@ public class ResidentView2 {
 
 	public List<Resident> read() {
 		List<Resident> data;
-		data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order, property, value, critMap);
+		data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order, property, value, null);
 		return data;
 	}
 
