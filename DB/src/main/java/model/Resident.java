@@ -9,8 +9,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -25,20 +25,20 @@ public class Resident implements Option {
 	private String sex;
 	private int age;
 	private String phone;
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name = "resident_type", nullable = false)
 	private ResidentType residentType;
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name = "room", nullable = false)
 	private Room room;
 	private double balance;
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name = "faculty", nullable = false)
 	private Faculty faculty;
-	@ManyToOne
+	@OneToOne
 	@JoinColumn(name = "form_of_education", nullable = false)
 	private FormOfEducation formOfEducation;
-	@OneToMany(mappedBy = "resident", fetch = FetchType.EAGER)
+	@OneToMany(mappedBy = "resident", fetch = FetchType.LAZY)
 	private Set<Payment> payments;
 
 	public Resident() {

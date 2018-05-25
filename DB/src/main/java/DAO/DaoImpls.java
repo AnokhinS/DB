@@ -3,11 +3,12 @@ package DAO;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.Order;
+import org.hibernate.criterion.Property;
 import org.postgresql.util.PSQLException;
 
 import model.Option;
@@ -70,20 +71,23 @@ public class DaoImpls<T> implements IDao<T> {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Collection<T> getAllItems(String order, String property, String value, List<Criterion> crits) {
+	public Collection<T> getAllItems(String order, String property, String value, Map<String, Object> map) {
 		List<T> items = new ArrayList<T>();
 		Session session = HibernateUtil.getSessionFactory().openSession();
 		@SuppressWarnings("deprecation")
+		Property resType = Property.forName("residentType");
 		Criteria result = session.createCriteria(classType);
 		if (order != null) {
 			result.addOrder(Order.asc(order));
 		} else if (property != null && value != null) {
 			result.createAlias(property, "p").addOrder(Order.asc("p." + value));
 		}
-		if (crits != null)
-			for (Criterion c : crits) {
-				result.add(c);
-			}
+		if (map != null) {
+			map.forEach((key, val) -> {
+				Property p = Property.forName(key);
+				result.add(p.eq(val));
+			});
+		}
 		items = result.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY).list();
 		session.close();
 		return items;

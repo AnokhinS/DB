@@ -1,10 +1,8 @@
 package view;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-
-import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
 
 import DAO.IDao;
 import hibernate.Factory;
@@ -33,7 +31,7 @@ public class DebtorView {
 	private String order = "id";
 	private String property = null;
 	private String value = null;
-	List<Criterion> crits = new ArrayList<>();
+	private HashMap<String, Object> critMap = new HashMap<>();
 	Label[] labels = { new Label("id"), new Label("Имя"), new Label("Пол"), new Label("Телефон"), new Label("Возраст"),
 			new Label("Тип проживающего"), new Label("Форма обучения"), new Label("Факультет"),
 			new Label("Адрес общежития"), new Label("Комната"), new Label("Счет") };
@@ -159,10 +157,15 @@ public class DebtorView {
 	}
 
 	public List<Resident> read() {
-		crits.add(Restrictions.lt("balance", 0d));
 		List<Resident> data;
-		data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order, property, value, crits);
-		return data;
+		List<Resident> debtors = new ArrayList<>();
+		data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order, property, value, null);
+		data.forEach(x -> {
+			if (x.getBalance() <= 0)
+				debtors.add(x);
+		});
+
+		return debtors;
 	}
 
 }

@@ -46,4 +46,5 @@ public class FormOfEducation implements Option {
 	public String toString() {
 		return "FormOfEducation [id=" + id + ", foe=" + foe + "]";
 	}
+
 }
