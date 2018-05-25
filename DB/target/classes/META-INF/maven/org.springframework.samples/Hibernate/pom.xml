@@ -24,10 +24,31 @@
 		<!-- Test -->
 		<junit.version>4.11</junit.version>
 
+
+	    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	    <jackson.version>2.9.0</jackson.version>
 	</properties>
 	
 	<dependencies>
-		<!-- Spring and Transactions -->
+		
+<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>${jackson.version}</version>
+  		</dependency>
+	  <dependency>
+	    <groupId>com.fasterxml.jackson.core</groupId>
+	    <artifactId>jackson-annotations</artifactId>
+	    <version>${jackson.version}</version>
+	  </dependency>
+  	<dependency>
+	    <groupId>com.fasterxml.jackson.core</groupId>
+	    <artifactId>jackson-core</artifactId>
+	    <version>${jackson.version}</version>
+ 	 </dependency>
+<!-- Spring and Transactions -->
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>

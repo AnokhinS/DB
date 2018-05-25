@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import DAO.IDao;
-import hibernate.Factory;
+import hibernate.MyDaoFactory;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
@@ -24,10 +24,10 @@ import model.Resident;
 public class DebtorView {
 
 	private Stage primaryStage = new Stage();
-	private IDao<Resident> mainDao = Factory.getInstance().getResidentDAO();
-	private IDao[] utilDao = { Factory.getInstance().getResidentTypeDAO(),
-			Factory.getInstance().getFormOfEducationDAO(), Factory.getInstance().getFacultyDAO(),
-			Factory.getInstance().getRoomDAO() };
+	private IDao<Resident> mainDao = MyDaoFactory.getInstance().getResidentDAO();
+	private IDao[] utilDao = { MyDaoFactory.getInstance().getResidentTypeDAO(),
+			MyDaoFactory.getInstance().getFormOfEducationDAO(), MyDaoFactory.getInstance().getFacultyDAO(),
+			MyDaoFactory.getInstance().getRoomDAO() };
 	private String order = "id";
 	private String property = null;
 	private String value = null;
@@ -101,17 +101,19 @@ public class DebtorView {
 		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
 				: data.size() / itemsPerPage() + 1;
 
-		Pagination pagination = new Pagination(count, 0);
-		pagination.setPageFactory(new Callback<Integer, Node>() {
-			@Override
-			public Node call(Integer pageIndex) {
-				return createPage(pageIndex);
-			}
-		});
-
 		VBox vbox = new VBox(10);
 		vbox.setPadding(new Insets(20));
-		vbox.getChildren().addAll(pagination);
+		if (count != 0) {
+			Pagination pagination = new Pagination(count, 0);
+			pagination.setPageFactory(new Callback<Integer, Node>() {
+				@Override
+				public Node call(Integer pageIndex) {
+					return createPage(pageIndex);
+				}
+			});
+			vbox.getChildren().addAll(pagination);
+		}
+
 		return vbox;
 	}
 
@@ -159,7 +161,7 @@ public class DebtorView {
 	public List<Resident> read() {
 		List<Resident> data;
 		List<Resident> debtors = new ArrayList<>();
-		data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order, property, value, null);
+		data = (List<Resident>) MyDaoFactory.getInstance().getResidentDAO().getAllItems(order, property, value, null);
 		data.forEach(x -> {
 			if (x.getBalance() <= 0)
 				debtors.add(x);

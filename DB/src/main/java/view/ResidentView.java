@@ -1,11 +1,18 @@
 package view;
 
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
 import DAO.IDao;
-import hibernate.Factory;
+import hibernate.MyDaoFactory;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -37,13 +44,13 @@ import model.Resident;
 import model.ResidentType;
 import model.Room;
 
-public class ResidentView2 {
+public class ResidentView {
 
 	private Stage primaryStage = new Stage();
-	private IDao<Resident> mainDao = Factory.getInstance().getResidentDAO();
-	private IDao[] utilDao = { Factory.getInstance().getResidentTypeDAO(),
-			Factory.getInstance().getFormOfEducationDAO(), Factory.getInstance().getFacultyDAO(),
-			Factory.getInstance().getRoomDAO() };
+	private IDao<Resident> mainDao = MyDaoFactory.getInstance().getResidentDAO();
+	private IDao[] utilDao = { MyDaoFactory.getInstance().getResidentTypeDAO(),
+			MyDaoFactory.getInstance().getFormOfEducationDAO(), MyDaoFactory.getInstance().getFacultyDAO(),
+			MyDaoFactory.getInstance().getRoomDAO() };
 	private Label[] labels = { new Label("id"), new Label("Имя"), new Label("Пол"), new Label("Телефон"),
 			new Label("Возраст"), new Label("Тип проживающего"), new Label("Форма обучения"), new Label("Факультет"),
 			new Label("Адрес общежития"), new Label("Комната"), new Label("Счет") };
@@ -53,7 +60,7 @@ public class ResidentView2 {
 	private ComboBox[] comboBoxes = comboInit();
 	private HashMap<String, Object> critMap = new HashMap<>();
 	private List<Resident> data;
-	private VBox vbox;
+	private VBox table;
 
 	ComboBox<String>[] comboInit() {
 		String[] options = { "М", "Ж" };
@@ -154,6 +161,11 @@ public class ResidentView2 {
 	Scene getScene() {
 		StackPane root = new StackPane();
 		data = read();
+		Button create = new Button();
+		create.setText("Поселить");
+		create.setOnAction(event -> {
+			create();
+		});
 		Button button = new Button("Сброс");
 		button.setOnAction(e -> {
 			order = "id";
@@ -162,15 +174,36 @@ public class ResidentView2 {
 			critMap = new HashMap();
 			primaryStage.setScene(getScene());
 		});
+
+		Button print = new Button("Печать");
+		print.setOnAction(e -> {
+			try (Writer writer = new BufferedWriter(
+					new OutputStreamWriter(new FileOutputStream("filename.txt"), "utf-8"))) {
+				for (Resident r : data)
+					writer.write(r.toString());
+				writer.close();
+			} catch (UnsupportedEncodingException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
+
 		HBox hbox = new HBox(10);
-		hbox.setPadding(new Insets(20));
+		hbox.setPadding(new Insets(0));
 		for (ComboBox c : comboBoxes)
 			hbox.getChildren().add(c);
 		hbox.getChildren().add(button);
-		vbox = getTable();
+		hbox.getChildren().add(print);
+		table = getTable();
 		VBox mainBox = new VBox(10);
-		mainBox.setPadding(new Insets(20));
-		mainBox.getChildren().addAll(hbox, vbox);
+		mainBox.setPadding(new Insets(50));
+		mainBox.getChildren().addAll(create, hbox, table);
 		root.getChildren().addAll(mainBox);
 		Scene scene = new Scene(root);
 		scene.getStylesheets().add("view.css");
@@ -184,24 +217,20 @@ public class ResidentView2 {
 	public VBox getTable() {
 		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
 				: data.size() / itemsPerPage() + 1;
-		System.out.println(data.size());
-		Pagination pagination = new Pagination(count, 0);
-		pagination.setPageFactory(new Callback<Integer, Node>() {
-			@Override
-			public Node call(Integer pageIndex) {
-				return createPage(pageIndex);
-			}
-		});
 
-		Button create = new Button();
-		create.setText("Поселить");
-		create.setOnAction(event -> {
-			create();
-		});
+		VBox vbox = new VBox(0);
+		vbox.setPadding(new Insets(0));
+		if (count != 0) {
+			Pagination pagination = new Pagination(count, 0);
+			pagination.setPageFactory(new Callback<Integer, Node>() {
+				@Override
+				public Node call(Integer pageIndex) {
+					return createPage(pageIndex);
+				}
+			});
+			vbox.getChildren().addAll(pagination);
+		}
 
-		VBox vbox = new VBox(10);
-		vbox.setPadding(new Insets(20));
-		vbox.getChildren().addAll(create, pagination);
 		return vbox;
 	}
 
@@ -388,7 +417,8 @@ public class ResidentView2 {
 
 	public List<Resident> read() {
 		List<Resident> data;
-		data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order, property, value, critMap);
+		data = (List<Resident>) MyDaoFactory.getInstance().getResidentDAO().getAllItems(order, property, value,
+				critMap);
 		return data;
 	}
 

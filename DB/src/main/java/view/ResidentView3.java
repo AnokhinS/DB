@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import DAO.IDao;
-import hibernate.Factory;
+import hibernate.MyDaoFactory;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -35,13 +35,13 @@ import model.Resident;
 import model.ResidentType;
 import model.Room;
 
-public class ResidentView {
+public class ResidentView3 {
 
 	private Stage primaryStage = new Stage();
-	private IDao<Resident> mainDao = Factory.getInstance().getResidentDAO();
-	private IDao[] utilDao = { Factory.getInstance().getResidentTypeDAO(),
-			Factory.getInstance().getFormOfEducationDAO(), Factory.getInstance().getFacultyDAO(),
-			Factory.getInstance().getRoomDAO() };
+	private IDao<Resident> mainDao = MyDaoFactory.getInstance().getResidentDAO();
+	private IDao[] utilDao = { MyDaoFactory.getInstance().getResidentTypeDAO(),
+			MyDaoFactory.getInstance().getFormOfEducationDAO(), MyDaoFactory.getInstance().getFacultyDAO(),
+			MyDaoFactory.getInstance().getRoomDAO() };
 	private String order = "id";
 	private String property = null;
 	private String value = null;
@@ -318,7 +318,7 @@ public class ResidentView {
 
 	public List<Resident> read() {
 		List<Resident> data;
-		data = (List<Resident>) Factory.getInstance().getResidentDAO().getAllItems(order, property, value, null);
+		data = (List<Resident>) MyDaoFactory.getInstance().getResidentDAO().getAllItems(order, property, value, null);
 		return data;
 	}
 

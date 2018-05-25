@@ -11,7 +11,7 @@ import javafx.stage.Stage;
 import view.DebtorView;
 import view.PaymentView;
 import view.PersonalView;
-import view.ResidentView2;
+import view.ResidentView;
 
 /**
  * hiberante
@@ -35,7 +35,7 @@ public class App extends javafx.application.Application {
 		Button residents = new Button();
 		residents.setText("Проживающие");
 		residents.setOnAction(event -> {
-			new ResidentView2().startApp();
+			new ResidentView().startApp();
 		});
 		residents.setPrefSize(200, 50);
 

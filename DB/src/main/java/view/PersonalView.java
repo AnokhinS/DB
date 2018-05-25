@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import DAO.IDao;
-import hibernate.Factory;
+import hibernate.MyDaoFactory;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
@@ -33,8 +33,8 @@ import model.StudentHouse;
 public class PersonalView {
 
 	private Stage primaryStage;
-	private IDao<Personal> mainDao = Factory.getInstance().getPersonalDAO();
-	private IDao[] utilDao = { Factory.getInstance().getProfessionDAO(), Factory.getInstance().getStudentHouseDAO() };
+	private IDao<Personal> mainDao = MyDaoFactory.getInstance().getPersonalDAO();
+	private IDao[] utilDao = { MyDaoFactory.getInstance().getProfessionDAO(), MyDaoFactory.getInstance().getStudentHouseDAO() };
 	private String order = "id";
 	private String property = null;
 	private String value = null;
@@ -82,24 +82,25 @@ public class PersonalView {
 	public VBox getTable() {
 		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
 				: data.size() / itemsPerPage() + 1;
-
-		Pagination pagination = new Pagination(count, 0);
-		pagination.setPageFactory(new Callback<Integer, Node>() {
-			@Override
-			public Node call(Integer pageIndex) {
-				return createPage(pageIndex);
-			}
-		});
-
 		Button create = new Button();
-		create.setText("Добавить работника");
+		create.setText("Принять на работу");
 		create.setOnAction(event -> {
 			create();
 		});
-
 		VBox vbox = new VBox(10);
 		vbox.setPadding(new Insets(20));
-		vbox.getChildren().addAll(create, pagination);
+		if (count != 0) {
+			Pagination pagination = new Pagination(count, 0);
+			pagination.setPageFactory(new Callback<Integer, Node>() {
+				@Override
+				public Node call(Integer pageIndex) {
+					return createPage(pageIndex);
+				}
+			});
+			vbox.getChildren().addAll(create, pagination);
+		} else
+			vbox.getChildren().addAll(create);
+
 		return vbox;
 	}
 
@@ -221,7 +222,7 @@ public class PersonalView {
 
 	public List<Personal> read() {
 		List<Personal> data;
-		data = (List<Personal>) Factory.getInstance().getPersonalDAO().getAllItems(order, property, value, null);
+		data = (List<Personal>) MyDaoFactory.getInstance().getPersonalDAO().getAllItems(order, property, value, null);
 		return data;
 	}
 

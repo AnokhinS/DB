@@ -12,8 +12,8 @@ import model.ResidentType;
 import model.Room;
 import model.StudentHouse;
 
-public class Factory {
-	private static Factory instance = null;
+public class MyDaoFactory {
+	private static MyDaoFactory instance = null;
 	private static IDao<Faculty> facultyDAO = null;
 	private static IDao<FormOfEducation> foeDAO = null;
 	private static IDao<Profession> profDAO = null;
@@ -24,9 +24,9 @@ public class Factory {
 	private static IDao<Payment> paymentDAO = null;
 	private static IDao<Resident> residentDAO = null;
 
-	public static synchronized Factory getInstance() {
+	public static synchronized MyDaoFactory getInstance() {
 		if (instance == null) {
-			instance = new Factory();
+			instance = new MyDaoFactory();
 		}
 		return instance;
 	}

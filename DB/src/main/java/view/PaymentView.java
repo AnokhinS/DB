@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import DAO.IDao;
-import hibernate.Factory;
+import hibernate.MyDaoFactory;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Insets;
@@ -35,8 +35,8 @@ import model.Resident;
 public class PaymentView {
 
 	private Stage primaryStage;
-	private IDao<Payment> mainDao = Factory.getInstance().getPaymentDAO();
-	private IDao utilDao = Factory.getInstance().getResidentDAO();
+	private IDao<Payment> mainDao = MyDaoFactory.getInstance().getPaymentDAO();
+	private IDao utilDao = MyDaoFactory.getInstance().getResidentDAO();
 	private String order = "id";
 	List<Payment> data = read();
 	VBox vbox = getTable();
@@ -77,24 +77,25 @@ public class PaymentView {
 	public VBox getTable() {
 		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
 				: data.size() / itemsPerPage() + 1;
-
-		Pagination pagination = new Pagination(count, 0);
-		pagination.setPageFactory(new Callback<Integer, Node>() {
-			@Override
-			public Node call(Integer pageIndex) {
-				return createPage(pageIndex);
-			}
-		});
-
 		Button create = new Button();
 		create.setText("Добавить платеж");
 		create.setOnAction(event -> {
 			create();
 		});
-
 		VBox vbox = new VBox(10);
 		vbox.setPadding(new Insets(20));
-		vbox.getChildren().addAll(create, pagination);
+		if (count != 0) {
+			Pagination pagination = new Pagination(count, 0);
+			pagination.setPageFactory(new Callback<Integer, Node>() {
+				@Override
+				public Node call(Integer pageIndex) {
+					return createPage(pageIndex);
+				}
+			});
+			vbox.getChildren().addAll(create, pagination);
+		} else
+			vbox.getChildren().addAll(create);
+
 		return vbox;
 	}
 
@@ -233,7 +234,7 @@ public class PaymentView {
 
 	public List<Payment> read() {
 		List<Payment> data = null;
-		data = (List<Payment>) Factory.getInstance().getPaymentDAO().getAllItems(order, null, null, null);
+		data = (List<Payment>) MyDaoFactory.getInstance().getPaymentDAO().getAllItems(order, null, null, null);
 		return data;
 	}
 

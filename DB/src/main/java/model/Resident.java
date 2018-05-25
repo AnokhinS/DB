@@ -47,9 +47,12 @@ public class Resident implements Option {
 
 	@Override
 	public String toString() {
-		return "Resident [id=" + id + ", name=" + name + ", sex=" + sex + ", age=" + age + ", phone=" + phone
-				+ ", resType=" + residentType + ", room=" + room + ", balance=" + balance + ", faculty=" + faculty
-				+ ", foe=" + formOfEducation + ", payments=" + payments + "]";
+		String tab = ",\n\t\t\t ";
+		String end = "]\n\n\n";
+		return "Проживающий [id: " + id + tab + "Имя: " + name + tab + "Пол: " + sex + tab + "Возраст: " + age + tab
+				+ "Телефон: " + phone + tab + "Тип проживащего: " + residentType.getName() + tab + "Комната: "
+				+ room.getName() + tab + "Факультет: " + faculty.getName() + tab + "Форма обучения: "
+				+ formOfEducation.getName() + tab + "Состояние счета: " + balance + end;
 	}
 
 	public Set<Payment> getPayments() {
