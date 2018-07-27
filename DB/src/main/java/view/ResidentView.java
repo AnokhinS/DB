@@ -45,22 +45,17 @@ import model.ResidentType;
 import model.Room;
 
 public class ResidentView {
-
 	private Stage primaryStage = new Stage();
 	private IDao<Resident> mainDao = MyDaoFactory.getInstance().getResidentDAO();
 	private IDao[] utilDao = { MyDaoFactory.getInstance().getResidentTypeDAO(),
 			MyDaoFactory.getInstance().getFormOfEducationDAO(), MyDaoFactory.getInstance().getFacultyDAO(),
 			MyDaoFactory.getInstance().getRoomDAO() };
-	private Label[] labels = { new Label("id"), new Label("Имя"), new Label("Пол"), new Label("Телефон"),
-			new Label("Возраст"), new Label("Тип проживающего"), new Label("Форма обучения"), new Label("Факультет"),
-			new Label("Адрес общежития"), new Label("Комната"), new Label("Счет") };
 	private String order = "id";
 	private String property = null;
 	private String value = null;
 	private ComboBox[] comboBoxes = comboInit();
-	private HashMap<String, Object> critMap = new HashMap<>();
+	private HashMap<String, Object> criteriaMap = new HashMap<>();
 	private List<Resident> data;
-	private VBox table;
 
 	ComboBox<String>[] comboInit() {
 		String[] options = { "М", "Ж" };
@@ -76,31 +71,31 @@ public class ResidentView {
 		comboBoxes[0].getItems().addAll(options);
 		comboBoxes[0].setOnAction(e -> {
 			String tmp = (String) comboBoxes[0].getSelectionModel().getSelectedItem();
-			critMap.put("sex", tmp);
+			criteriaMap.put("sex", tmp);
 			primaryStage.setScene(getScene());
 			comboBoxes[0].setPromptText(tmp);
 		});
 		comboBoxes[1].setOnAction(e -> {
 			String tmp = (String) comboBoxes[1].getSelectionModel().getSelectedItem();
-			critMap.put("residentType", new ResidentType(Long.valueOf(tmp.split("-")[0])));
+			criteriaMap.put("residentType", new ResidentType(Long.valueOf(tmp.split("-")[0])));
 			primaryStage.setScene(getScene());
 			comboBoxes[1].setPromptText(tmp);
 		});
 		comboBoxes[2].setOnAction(e -> {
 			String tmp = (String) comboBoxes[2].getSelectionModel().getSelectedItem();
-			critMap.put("formOfEducation", new FormOfEducation(Long.valueOf(tmp.split("-")[0])));
+			criteriaMap.put("formOfEducation", new FormOfEducation(Long.valueOf(tmp.split("-")[0])));
 			primaryStage.setScene(getScene());
 			comboBoxes[2].setPromptText(tmp);
 		});
 		comboBoxes[3].setOnAction(e -> {
 			String tmp = (String) comboBoxes[3].getSelectionModel().getSelectedItem();
-			critMap.put("faculty", new Faculty(Long.valueOf(tmp.split("-")[0])));
+			criteriaMap.put("faculty", new Faculty(Long.valueOf(tmp.split("-")[0])));
 			primaryStage.setScene(getScene());
 			comboBoxes[3].setPromptText(tmp);
 		});
 		comboBoxes[4].setOnAction(e -> {
 			String tmp = (String) comboBoxes[4].getSelectionModel().getSelectedItem();
-			critMap.put("room", new Room(Long.valueOf(tmp.split("-")[0])));
+			criteriaMap.put("room", new Room(Long.valueOf(tmp.split("-")[0])));
 			primaryStage.setScene(getScene());
 			comboBoxes[4].setPromptText(tmp);
 		});
@@ -108,7 +103,10 @@ public class ResidentView {
 		return comboBoxes;
 	}
 
-	void labelInit() {
+	Label[] labelInit() {
+		Label[] labels = { new Label("id"), new Label("Имя"), new Label("Пол"), new Label("Телефон"),
+				new Label("Возраст"), new Label("Тип проживающего"), new Label("Форма обучения"),
+				new Label("Факультет"), new Label("Адрес общежития"), new Label("Комната"), new Label("Счет") };
 		for (Label l : labels) {
 			l.setOnMouseClicked(event -> {
 				if (l.getText().equals("id"))
@@ -148,6 +146,7 @@ public class ResidentView {
 				primaryStage.setScene(getScene());
 			});
 		}
+		return labels;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -171,7 +170,8 @@ public class ResidentView {
 			order = "id";
 			property = null;
 			value = null;
-			critMap = new HashMap();
+			criteriaMap = new HashMap();
+			comboBoxes = comboInit();
 			primaryStage.setScene(getScene());
 		});
 
@@ -200,7 +200,7 @@ public class ResidentView {
 			hbox.getChildren().add(c);
 		hbox.getChildren().add(button);
 		hbox.getChildren().add(print);
-		table = getTable();
+		VBox table = getTable();
 		VBox mainBox = new VBox(10);
 		mainBox.setPadding(new Insets(50));
 		mainBox.getChildren().addAll(create, hbox, table);
@@ -210,11 +210,11 @@ public class ResidentView {
 		return scene;
 	}
 
-	public int itemsPerPage() {
+	private int itemsPerPage() {
 		return 5;
 	}
 
-	public VBox getTable() {
+	private VBox getTable() {
 		int count = (data.size() % itemsPerPage() == 0) ? data.size() / itemsPerPage()
 				: data.size() / itemsPerPage() + 1;
 
@@ -234,12 +234,13 @@ public class ResidentView {
 		return vbox;
 	}
 
-	public VBox createPage(int pageIndex) {
+	private VBox createPage(int pageIndex) {
 		VBox box = new VBox(10);
 		int page = pageIndex * itemsPerPage();
 		GridPane gridPane = new GridPane();
 		gridPane.setHgap(30);
 		gridPane.setVgap(10);
+		Label[] labels = labelInit();
 		for (int j = 0; j < labels.length; j++) {
 			labels[j].setFont(new Font("Arial", 15));
 			gridPane.add(labels[j], j, 0);
@@ -281,7 +282,7 @@ public class ResidentView {
 		return box;
 	}
 
-	public void create() {
+	private void create() {
 		String[] attr = { "Введите имя проживающего", "Введите возраст", "Введите номер телефона", "Выберите пол",
 				"Выберите тип проживающего", "Выберите форму обучения", "Выберите факультет", "Выберите комнату" };
 
@@ -384,6 +385,13 @@ public class ResidentView {
 			} else {
 				fields[2].getStyleClass().remove("error");
 			}
+			for (Resident r : data) {
+				if (r.getName().equals(name)) {
+					checker = false;
+					area.appendText("Проживающий с таким именем уже существует");
+				}
+
+			}
 
 			if (checker) {
 				for (TextField tf : fields)
@@ -415,14 +423,14 @@ public class ResidentView {
 		createStage.show();
 	}
 
-	public List<Resident> read() {
+	private List<Resident> read() {
 		List<Resident> data;
 		data = (List<Resident>) MyDaoFactory.getInstance().getResidentDAO().getAllItems(order, property, value,
-				critMap);
+				criteriaMap);
 		return data;
 	}
 
-	public void update(long l) {
+	private void update(long l) {
 		String[] attr = { "Имя проживающего", "Возраст", "Телефон", "Пол", "Тип проживающего", "Форма обучения",
 				"Факультет", "Комната" };
 		Resident item = mainDao.getItemById(l);
@@ -530,6 +538,14 @@ public class ResidentView {
 			} else {
 				fields[2].getStyleClass().remove("error");
 			}
+			for (Resident r : data) {
+				if (r.getName().equals(name)) {
+					checker = false;
+					area.appendText("Проживающий с таким именем уже существует");
+				}
+
+			}
+
 			if (checker) {
 				for (TextField tf : fields) {
 					tf.getStyleClass().remove("error");
@@ -564,7 +580,7 @@ public class ResidentView {
 		updateStage.show();
 	}
 
-	public void delete(long l) {
+	private void delete(long l) {
 		Resident item = mainDao.getItemById(l);
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.setTitle("Удаление " + item.getName());
